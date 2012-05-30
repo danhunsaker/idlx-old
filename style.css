@@ -16,6 +16,7 @@ body div {
 a {
 	color: cadetblue;
 	text-decoration: none;
+	border: none;
 }
 
 a:hover {
@@ -69,4 +70,23 @@ a:hover {
 
 .content {
 	margin-top: -4em;
+}
+
+/*.thanks {
+	text-align: center;
+}*/
+
+.thanks a {
+	padding-right: 35px;
+	position: relative;
+	top: 30px;
+}
+
+.thanks a img {
+	height: 33px;
+	border: none;
+}
+
+h1 + img {
+	float: right;
 }

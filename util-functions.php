@@ -98,17 +98,72 @@
 	
 	if (!function_exists('get_footer')) {
 		function get_footer() {
+			//	Create a new DOMDocument.  Things are cleaner this way.
 			$dom = new DOMDocument();
+			
+			//	The footer div
 			$foot_node = $dom->createElementNS('http://www.w3c.org/1999/xhtml/', 'div');
 			$foot_node->setAttribute('class', 'footer');
+			
+			//	The copyright span
 			$copy_node = $dom->createElementNS('http://www.w3c.org/1999/xhtml/', 'span', '&copy; 2011'.(date('Y') > 2011 ? '-'.date('Y') : '').' by ');
 			$copy_node->setAttribute('id', 'copy');
+			
+			//	The IDLX team (sf.net site) link
 			$team_node = $dom->createElementNS('http://www.w3c.org/1999/xhtml/', 'a', 'The IDLX Team');
 			$team_node->setAttribute('href', 'http://idlx.sourceforge.net/');
+			
+			//	The last bit of the copyright span
 			$copy_node_2 = $dom->createTextNode('.  Released under the GPL.');
+			
+			//	The supporting technologies paragraph
+			$para_node = $dom->createElementNS('http://www.w3c.org/1999/xhtml/', 'p', 'The IDLX Framework would have never existed without the work of these projects:');
+			$para_node->setAttribute('class', 'thanks');
+			
+			//	A line break to force the images to their own line.
+			$break_node = $dom->createElementNS('http://www.w3c.org/1999/xhtml/', 'br');
+			
+			//	Link to PHP home page
+			$link_node_php = $dom->createElementNS('http://www.w3c.org/1999/xhtml/', 'a');
+			$link_node_php->setAttribute('href', 'http://www.php.net/');
+			
+			//	PHP logo image
+			$logo_node_php = $dom->createElementNS('http://www.w3c.org/1999/xhtml/', 'img');
+			$logo_node_php->setAttribute('src', 'images/php-med-trans.png');
+			$logo_node_php->setAttribute('alt', 'PHP');
+			
+			//	Link to Apache FOP home page
+			$link_node_fop = $dom->createElementNS('http://www.w3c.org/1999/xhtml/', 'a');
+			$link_node_fop->setAttribute('href', 'http://xmlgraphics.apache.org/fop/');
+			
+			//	Apache FOP logo image
+			$logo_node_fop = $dom->createElementNS('http://www.w3c.org/1999/xhtml/', 'img');
+			$logo_node_fop->setAttribute('src', 'images/fop-logo.jpg');
+			$logo_node_fop->setAttribute('alt', 'Apache FOP');
+			
+			//	Link to Adobe Reader download page
+			$link_node_pdf = $dom->createElementNS('http://www.w3c.org/1999/xhtml/', 'a');
+			$link_node_pdf->setAttribute('href', 'http://get.adobe.com/reader/');
+			
+			//	Get Reader logo image
+			$logo_node_pdf = $dom->createElementNS('http://www.w3c.org/1999/xhtml/', 'img');
+			$logo_node_pdf->setAttribute('src', 'images/get_adobe_reader.gif');
+			$logo_node_pdf->setAttribute('alt', 'Adobe PDF');
+			
+			//	Put the pieces together in the correct order
+			$link_node_php->appendChild($logo_node_php);
+			$link_node_fop->appendChild($logo_node_fop);
+			$link_node_pdf->appendChild($logo_node_pdf);
+			$para_node->appendChild($break_node);
+			$para_node->appendChild($link_node_php);
+			$para_node->appendChild($link_node_fop);
+			$para_node->appendChild($link_node_pdf);
 			$copy_node->appendChild($team_node);
 			$copy_node->appendChild($copy_node_2);
 			$foot_node->appendChild($copy_node);
+			$foot_node->appendChild($para_node);
+			
+			//	Send the result back to the caller
 			return $foot_node;
 		}
 	}

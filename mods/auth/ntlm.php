@@ -22,6 +22,8 @@
 			
 //			error_log("Auth_NTLM::auth || Requesting NTLM credentials.");
 			$auth = ntlm_prompt('IDLX Framework', $config['auth-ntlm-domain'], $config['auth-ntlm-server'], $config['auth-ntlm-domain'], $config['auth-ntlm-server'], 'ntlm_auth_user_hash');
+			//	If auth failed, check that the response wasn't NTLMv1...
+			if ($auth['authenticated'] === false) $auth = ntlm_prompt('IDLX Framework', $config['auth-ntlm-domain'], $config['auth-ntlm-server'], $config['auth-ntlm-domain'], $config['auth-ntlm-server'], 'ntlm_auth_user_hash', 'ntlm_verify_des');
 			
 			if ($auth['authenticated'] === true) {
 				if ($config['auth-ntlm-ldap']) {
@@ -100,14 +102,58 @@
 		$user_exists = $db->raw_sql("select AES_DECRYPT(`{$config['db-userinfo-password']}`, '{$config['db-encryption-password']}') as {$config['db-userinfo-password']} from `{$config['db-userinfo-tablename']}` where `{$config['db-userinfo-login']}`=\"{$user}\"");
 		if ($user_exists === false) {
 			error_log ("Auth_NTLM  ntlm_auth_user_hash || Username [{$user}] not in database.");
-			return $this->send_digest_request($realm);			//	Request new credentials.
+			return false;
 		}
 		$pass = $db->get_result_value($config['db-userinfo-password'], 0);		//	Because storing unencrypted passwords in the database is inherently dangerous, $pass is equivalent to the A1 section of a Digest Auth response.
 		$auth->store_details($user, $pass);
 
 //		error_log("Auth_NTLM  ntlm_auth_user_hash || Generating NTLM password hash [{$pass}]");
 		
-		return ntlm_md4(ntlm_utf8_to_utf16le($pass));
+		return ntlm_md4(ntlm_utf8_to_utf16le(utf8_encode($pass)));
 	}
 	
+	function ntlm_verify_des($challenge, $user, $domain, $workstation, $clientblobhash, $clientblob, $get_ntlm_user_hash) {
+//		error_log ("mods/auth/ntlm.php ntlm_verify_des || Attempting NTLM auth with DES instead of HMAC_MD5");
+		
+		$md4hash = $get_ntlm_user_hash($user);
+		if (!$md4hash)
+			return false;
+		
+		$md4hash .= str_repeat("\x00", 5);
+		for ($i = 0, $passalong = array(), $md4h2 = ''; $i < strlen($md4hash); $i++) {
+			$tmpval = array_merge($passalong, str_split(sprintf('%08s', decbin(ord(substr($md4hash, $i, 1))))));
+			
+			$passalong = array_slice($tmpval, 7);
+			$tmpval = array_slice($tmpval, 0, 7);
+			$parity = array_count_values($tmpval);
+//			error_log ("mods/auth/ntlm.php ntlm_verify_des || Parity check [".var_export($parity, true)."]");
+			$tmpval[7] = (isset($parity['1']) && (($parity['1'] % 2) == 1)) ? '1' : '0';
+			$md4h2 .= chr(bindec(implode('', $tmpval)));
+			
+			if (count($passalong) == 7) {
+				$pa_parity = array_count_values($passalong);
+//				error_log ("mods/auth/ntlm.php ntlm_verify_des || PassAlong Parity check [".var_export($pa_parity, true)."]");
+				$passalong[7] = (isset($pa_parity['1']) && (($pa_parity['1'] % 2) == 1)) ? '1' : '0';
+				$md4h2 .= chr(bindec(implode('', $passalong)));
+				$passalong = array();
+			}
+		}
+		
+//		error_log ("mods/auth/ntlm.php ntlm_verify_des || Keystring converted [".bin2hex($md4hash)." => ".bin2hex($md4h2)."]");
+		
+		$key1 = substr($md4h2, 0, 8);
+		$key2 = substr($md4h2, 8, 8);
+		$key3 = substr($md4h2, 16, 8);
+/*
+		$key1 = substr($md4hash, 0, 7);
+		$key2 = substr($md4hash, 7, 7);
+		$key3 = substr($md4hash, 14, 7);
+*/		
+		$blobhash  = mcrypt_encrypt(MCRYPT_DES, $key1, $challenge, MCRYPT_MODE_ECB);
+		$blobhash .= mcrypt_encrypt(MCRYPT_DES, $key2, $challenge, MCRYPT_MODE_ECB);
+		$blobhash .= mcrypt_encrypt(MCRYPT_DES, $key3, $challenge, MCRYPT_MODE_ECB);
+		
+//		error_log ("mods/auth/ntlm.php ntlm_verify_des || Returning result of DES comparison [{$user}-@-{$domain} || ".bin2hex($blobhash)." || ".bin2hex($clientblobhash.$clientblob)."]");
+		return ($blobhash == $clientblobhash.$clientblob);
+	}
 ?>

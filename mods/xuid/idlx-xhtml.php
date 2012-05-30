@@ -36,7 +36,7 @@
 			foreach ($idlx_root as $idlx) {
 				$out_children = $xp->evaluate("//idlx:iface//*[namespace-uri()!=\"".IDLX_NS_URI."\" and namespace-uri()!=namespace-uri(parent::*)]", $idlx);
 				foreach ($out_children as $out_node) {
-					error_log("XUID_IDLX_XHTML::translate || Moving [{$out_node->tagName}] to end of [{$out_root->tagName}]");
+//					error_log("XUID_IDLX_XHTML::translate || Moving [{$out_node->tagName}] to end of [{$out_root->tagName}]");
 					if ($out_node->isSameNode($out_root)) continue;
 					$out_node->parentNode->removeChild($out_node);
 					$out_root->appendChild($out_node);

@@ -73,8 +73,8 @@
 		'auth' => array (									//	
 			'engine' => array (								//	auth-engine supports a fallback mechanism:
 				0 => 'CLO',									//	auth-engine-0 is the default auth mechanism,
-				1 => 'NTLM',								//	auth-engine-1 is the first fallback mech if auth-engine-0 fails,
-				2 => 'Pass',								//	and auth-engine-2 is the second fallback, etc.
+//				1 => 'NTLM',								//	auth-engine-1 is the first fallback mech if auth-engine-0 fails,
+				1 => 'Pass',								//	and auth-engine-2 is the second fallback, etc.
 			),												
 		),
 	);

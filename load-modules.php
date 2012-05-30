@@ -25,6 +25,7 @@
 		$auth_class = 'Auth_'.$auth_engine;
 		$auth = new $auth_class();
 		
+//		error_log ("load-modules.php || Attempting auth with {$auth_class} [{$mod_i}]...");
 		$uid = $auth->auth($db);
 		if ($uid !== false) {
 			error_log ("load-modules.php || Successful auth with {$auth_class} [{$mod_i}]");

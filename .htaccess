@@ -7,5 +7,4 @@ RewriteRule  (.*) https://%1 [L,R]
 
 SSLVerifyClient				optional
 SSLVerifyDepth				4
-SSLOptions					+ExportCertData
-#SSLRequire					%{SSL_CIPHER_USEKEYSIZE} >= 128
+SSLOptions					+ExportCertData +OptRenegotiate
