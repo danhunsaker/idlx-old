@@ -9,12 +9,16 @@ IDLX Tag Reference:
 										survive script execution to be evaluated.  (This allows 
 										script blocks to return full Interfaces, if needed, or even 
 										other script blocks.)
-<idlx:report>						-	Report modules are triggered by these blocks.
+<idlx:report id="">					-	Report modules are triggered by these blocks.  The ID tag 
+										specifies a name to present to the user.  This is a caption
+										for <idlx:return>interface</idlx:return>; link text for
+										<idlx:return>link</idlx:return>; etc.
 	<idlx:input>					-	Defines the report to process.
 		<idlx:format>				-	Identifies which Reports Module to use.
 		<idlx:description>			-	Identifies the report description file to use.
 	<idlx:output>					-	Defines the way to present the report to the user.
-		<idlx:format>				-	Identifies the desired output format (i.e., PDF).
+		<idlx:format>				-	Identifies the desired output format (i.e., PDF).  (FOP 
+										supports direct output to the default printer...)
 		<idlx:return>				-	Identifies the desired method for presenting the finished
 										report to the user.  Valid values:
 											interface	::	Present the report within the UI.
@@ -29,7 +33,7 @@ IDLX Tag Reference:
 											test		::	Don't actually present the report.
 										Possible extended values, assuming module/Project support:
 											email		::	Email the report to the user.
-											print		::	Print the report.  Printer in name tag.
+											print		::	Print the report.  Printer in name tag?
 										Of course, any module can define its own values, though it 
 										must register them with the core.
 		<idlx:name>					-	Provides a filename hint for the final report, when valid.

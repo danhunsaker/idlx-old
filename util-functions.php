@@ -6,7 +6,7 @@
 		Designed with the capability to override anything defined here by simply defining it before this file is called.
 	*/
 	
-	define('IDLX_NS_URI', 'http://idlx.sourceforge.net/schema/');
+	define('IDLX_NS_URI', 'http://idlx.sourceforge.net/schema/2011/08/');
 	
 	if (!function_exists('collapse_multi_array')) {
 		function collapse_multi_array (array $multi) {

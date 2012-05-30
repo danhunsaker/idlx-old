@@ -36,7 +36,6 @@
 	}
 	$if_dom = new DOMDocument();
 	$if_dom->formatOutput = true;
-//	$if_dom->preserveWhiteSpace = false;
 	$if_dom->loadXML($main_iface);
 	$footer = $if_dom->importNode(get_footer(), true);
 	$if_dom->documentElement->appendChild($footer);
@@ -45,7 +44,6 @@
 	$nothingNew = false;
 	while ($nothingNew == false) {
 		$if_dom->formatOutput = true;
-//		$if_dom->preserveWhiteSpace = false;
 		$if_dom->normalizeDocument();
 //		error_log("index.php || Begin processing pass [{$if_dom->saveXML()}]");
 		$nothingNew = true;
@@ -62,7 +60,6 @@
 //					error_log("index.php || Importing external Interface [{$iface_name} || {$iface_contents}]");
 					$import_dom = $node->ownerDocument->createDocumentFragment();
 					$import_dom->appendXML($iface_contents);
-//					$new_node = $node->ownerDocument->importNode($import_dom->documentElement);
 					$node->parentNode->replaceChild($import_dom, $node);
 				}
 				else {
@@ -106,6 +103,7 @@
 				$output_type = '';
 				$output_style = '';
 				$output_file = '';
+				$link_text = mb_strtolower(utf8_decode($node->attributes->getNamedItem('id')->textContent));
 				foreach ($node->childNodes as $childNode) {		//	Determine what type of report to generate, and how.
 					if ($childNode->nodeType != XML_ELEMENT_NODE) continue;
 					switch ($childNode->localName) {
@@ -161,15 +159,59 @@
 				}
 
 				if (isset($rep_proc_mods[$input_type]) && isset($rep_gen_mods[$output_type])) {		//	Can't generate a report if we don't have modules for it.
-					$report = $rep_gen_mods[$output_type]->generate($rep_proc_mods[$input_type]->process($proj_dir.'reports/'.$input_file), $output_style, $output_file);
+					$report = $rep_gen_mods[$output_type]->generate($rep_proc_mods[$input_type]->process($input_file));
 					if (empty($report) || $report === false) {		//	We want to replace the report node with the ReportGenerator output, but if there is none, we need to remove the node entirely.
 						if (empty($report)) error_log("index.php || Report generated (responded with an empty string) [{$input_type}({$input_file}) => {$output_type}::{$output_style}({$output_file})]");
 						else error_log("index.php || Report generator encountered an error [{$input_type}({$input_file}) => {$output_type}::{$output_style}({$output_file})]");
-						$node->parentNode->removeChild($node);
+						if ($output_style == 'test') {
+							$new_node = $node->ownerDocument->createElementNS('http://www.w3c.org/1999/xhtml/', 'p', 'Report generation failed.  Test UNSAT.');
+							$node->parentNode->replaceChild($new_node, $node);
+							$node->ownerDocument->normalizeDocument();
+						}
+						else {
+							$node->parentNode->removeChild($node);
+						}
 					}
 					else {										//	The ReportGenerator returned a non-empty result - add it to the output.
 //						error_log("index.php || Report generated (responded with report presentation) [{$input_type}({$input_file}) => {$output_type}::{$output_style}({$output_file})]");
-						$new_node = importFragment(utf8_encode(trim($report)), $node->ownerDocument);
+						file_put_contents($proj_dir.'/reports/download/'.$output_file, $report);
+						switch ($output_style) {
+						case 'interface':		//	Output directly to the Interface (use $link_text as caption)
+							$new_node = $node->ownerDocument->createElementNS('http://www.w3c.org/1999/xhtml/', 'object', 'Report generation succeeded.  Download it ');
+							$new_link_node = $new_node->ownerDocument->createElementNS('http://www.w3c.org/1999/xhtml/', 'a', 'here');
+							$new_link_node->setAttribute('href', $siteroot.'/reports/download/'.$output_file);
+							$new_node->appendChild($new_link_node);
+							$new_text_node = $new_node->ownerDocument->createTextNode('.  (Tried to display the report in the browser and failed.  Check that your browser supports embedded PDFs.)');
+							$new_node->appendChild($new_text_node);
+							$new_node->setAttribute('data', $siteroot.'/reports/download/'.$output_file);
+							$new_node->setAttribute('type', $output_type);
+							$new_node->setAttribute('width', '600');
+							$new_node->setAttribute('height', '825');
+							break;
+						case 'separate':		//	Output as download
+							header('Location: '.$siteroot.'/reports/download/'.$output_file);
+							$new_node = $node->ownerDocument->createElementNS('http://www.w3c.org/1999/xhtml/', 'p', 'Report generation succeeded.  Your download should begin within the next few seconds.');
+							break;
+						case 'link':			//	Output as link (use $link_text as link text)
+							$new_node = $node->ownerDocument->createElementNS('http://www.w3c.org/1999/xhtml/', 'p', 'Report generation succeeded.  Download it ');
+							$new_link_node = $new_node->ownerDocument->createElementNS('http://www.w3c.org/1999/xhtml/', 'a', 'here');
+							$new_link_node->setAttribute('href', $siteroot.'/reports/download/'.$output_file);
+							$new_node->appendChild($new_link_node);
+							$new_text_node = $new_node->ownerDocument->createTextNode('.');
+							$new_node->appendChild($new_text_node);
+							break;
+						case 'local':			//	Output as local file (not available in Interface)
+							$new_node = $node->ownerDocument->createElementNS('http://www.w3c.org/1999/xhtml/', 'p', 'Report generation succeeded.  Report saved in "/reports/download/" as "'.$output_file.'".  Contact the site administrator for access.');
+							break;
+						case 'test':			//	Don't output the report anywhere; just test results.
+							unlink($proj_dir.'/reports/download/'.$output_file);
+							$new_node = $node->ownerDocument->createElementNS('http://www.w3c.org/1999/xhtml/', 'p', 'Report generation succeeded.  Test SAT.');
+							break;
+						default:				//	Unknown value
+							error_log("index.php || Report output style [{$output_style}] not understood.");
+							$new_node = $node->ownerDocument->createElementNS('http://www.w3c.org/1999/xhtml/', 'p', 'Report display failed (unsupported display method).  Have the site administrator check the error logs.  Report saved in "/reports/download/" as "'.$output_file.'".  Contact the site administrator for access.');
+							break;
+						}
 						$node->parentNode->replaceChild($new_node, $node);
 						$node->ownerDocument->normalizeDocument();
 					}

@@ -1,4 +1,4 @@
-<html xmlns:idlx="http://idlx.sourceforge.net/schema/" xmlns="http://www.w3c.org/1999/xhtml/">
+<html xmlns:idlx="http://idlx.sourceforge.net/schema/2011/08/" xmlns="http://www.w3c.org/1999/xhtml/">
 	<head>
 		<title>IDLX Main Interface</title>
 		<idlx:script lang="php">
