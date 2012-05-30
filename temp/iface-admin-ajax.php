@@ -65,7 +65,19 @@ elseif (!isset($_REQUEST['cname']) && !isset($_REQUEST['iname']) && isset($_REQU
 	return '';		//	Success!  Return an empty string so the AJAX handler won't spit out a 403 header.
 }
 elseif (!isset($_REQUEST['cname']) && !isset($_REQUEST['iname']) && !isset($_REQUEST['savename']) && isset($_REQUEST['slayname'])) {	//	slayName only - Destroy an Interface.
-	return 'DELETE INTERFACE NOT YET IMPLEMENTED';
+//	return 'DELETE INTERFACE NOT YET IMPLEMENTED';
+	$iface_perms = $db->acl_iface($_REQUEST['savename']);
+	$iftbl_perms = $db->acl_table($config['db-interfaces-tablename']);
+	$slay_perms = $iface_perms | $iftbl_perms;
+	
+	if (($slay_perms & 0x50) == 0x50) {
+		$db->raw_sql("delete from `{$config['db-interfaces-tablename']}` where `{$config['db-interfaces-codename']}`=\"{$_REQUEST['slayname']}\"");
+	}
+	else {
+		return "INTERFACE DELETE FAILED; INSUFFICIENT PERMS [{$slay_perms}] REQUIRES AT LEAST [" . 0x50 . "]";
+	}
+	
+	return '';
 }
 else {	//	Something else we don't understand
 	return 'UNKNOWN REQUEST';

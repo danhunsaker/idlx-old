@@ -133,7 +133,7 @@
 					foreach ($pperms as $perm) {
 						if ($perm == 0) continue;
 						$stmt->execute(array('permid'=>$perm));
-						$more_pperms = $stms->fetchAll(PDO::FETCH_COLUMN, 0);
+						$more_pperms = $stmt->fetchAll(PDO::FETCH_COLUMN, 0);
 						foreach ($more_pperms as $more_perm) {
 							if ($more_perm == 0) continue;
 							if (!in_array($more_perm, $pperms)) $pperms[] = $more_perm;

@@ -14,6 +14,10 @@
 				$count = $api->db()->get_result_value(0, 0);
 				for ($i = 1; $i <= $count; $i++) {
 					$value   = $api->db()->get_data_value('Interfaces', 'ID="'.$i.'"', 'CodeName');
+					if ($value === false) {
+						$count++;
+						continue;
+					}
 					$display = $api->db()->get_data_value('Interfaces', 'ID="'.$i.'"', 'InterfaceName');
 					echo "<h:option value=\"{$value}\" xmlns:h=\"http://www.w3c.org/1999/xhtml/\">{$display}</h:option>";
 				}
@@ -29,6 +33,7 @@
 	</h:textarea>
 	<h:input type="submit" name="save" value="Save Changes" />
 	<h:input type="button" name="revert" value="Revert Changes" onclick="revert_iface()" />
+	<h:input type="button" name="destroy" value="Destroy Interface" onclick="destroy_iface()" />
 </h:form>
 <h:script type="text/javascript" xmlns:h="http://www.w3c.org/1999/xhtml/">
 	<![CDATA[
@@ -181,6 +186,34 @@
 			}
 		}
 		xmlhttp.open("GET", "ajax.php?p=iface-admin&cname="+encodeURIComponent(cname)+"&iname="+encodeURIComponent(iname), true);
+		xmlhttp.send();
+	}
+	
+	function destroy_iface() {
+		if (prompt("Are you ABSOLUTELY CERTAIN you wish to delete this Interface?\nThis CANNOT be undone.\nIf you do not have a recent backup, press Cancel, make a fresh backup, then try again.\n\nIf you are sure, type DELETE (all caps) in this box and click OK.") != "DELETE") {
+			return;
+		}
+		alert("This Interface is now being removed.  It can only be recovered from a recent backup.");
+		
+		document.forms[0].elements[1].readOnly = true;
+		document.forms[0].elements[2].readOnly = true;
+		destroy_iface = document.forms[0].elements[0].selectedIndex;
+		
+		xmlhttp.onreadystatechange = function() {
+			if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+				//	Remove Interface from the selection list
+				document.forms[0].elements[0].remove(destroy_iface);
+				codeCName = '';
+				
+				document.forms[0].elements[1].value = '';
+				document.forms[0].elements[1].readOnly = false;
+				document.forms[0].elements[2].value = '';
+				document.forms[0].elements[2].readOnly = false;
+			} else if (xmlhttp.readyState == 4) {
+				alert ("Interface destruction failed.\n\n"+xmlhttp.responseText);
+			}
+		}
+		xmlhttp.open("GET", "ajax.php?p=iface-admin&slayname="+encodeURIComponent(codeCName), true);
 		xmlhttp.send();
 	}
 	

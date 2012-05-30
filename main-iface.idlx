@@ -15,6 +15,7 @@
 				$at_home = true;
 				$navtags = '';
 				for ($i = 0; $cname = $api->db()->get_data_value('Interfaces', '`CodeName` LIKE "%-nav" LIMIT '.$i.',1', 'CodeName'); $i++) {
+					if (($api->db()->acl_iface($cname) & 0x01) != 0x01) continue;
 					$dispname = $api->db()->get_data_value('Interfaces', '`CodeName` LIKE "%-nav" LIMIT '.$i.',1', 'InterfaceName');
 					if (isset($api->_request['p']) && $api->_request['p'] == $cname) {
 						$seltext = ' id="selected"';
