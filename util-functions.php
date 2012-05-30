@@ -74,7 +74,7 @@
 				$siteroot = strtr(dirname($_SERVER['SCRIPT_FILENAME']), array('\\' => '/', $_SERVER['DOCUMENT_ROOT'] => ''));
 			}
 			if (!in_array(substr($message, -1), array('.', '!', '?'))) $message .= '.';
-			error_log ("{$caller} || {$message}  Redirecting to project root [{$siteroot}].  Doc requested [{$_SERVER['REQUEST_URI']}{$_SERVER['PATH_INFO']}?{$_SERVER['QUESRY_STRING']}]");
+			error_log ("{$caller} || {$message}  Redirecting to project root [{$siteroot}].  Doc requested [{$_SERVER['REQUEST_URI']}{$_SERVER['PATH_INFO']}?{$_SERVER['QUERY_STRING']}]");
 			header('Location: '.$siteroot.'/');
 			ob_end_clean();
 			die();
@@ -91,6 +91,21 @@
 				$node = clean_whitespace_from_nodes ($node);
 			}
 			return $dom;
+		}
+	}
+	
+	if (!function_exists('get_footer')) {
+		function get_footer() {
+			$dom = new DOMDocument();
+			$foot_node = $dom->createElementNS('http://www.w3c.org/1999/xhtml/', 'div');
+			$foot_node->setAttribute('class', 'footer');
+			$copy_node = $dom->createElementNS('http://www.w3c.org/1999/xhtml/', 'span', '&copy; 2011'.(date('Y') > 2011 ? '-'.date('Y') : '').' by&nbsp;');
+			$copy_node->setAttribute('id', 'copy');
+			$team_node = $dom->createElementNS('http://www.w3c.org/1999/xhtml/', 'a', 'The IDLX Team');
+			$team_node->setAttribute('href', 'http://idlx.sourceforge.net/');
+			$copy_node->appendChild($team_node);
+			$foot_node->appendChild($copy_node);
+			return $foot_node;
 		}
 	}
 	

@@ -82,25 +82,12 @@
 			return true;
 		}
 		
-		public function add_user ($uid) {
+		public function user_add_update ($uid) {
 			global $config, $db;
 			
 			if (!$db->get_user(array($config['db-userinfo-userid'] => $uid))) {
 				error_log ("Auth_Pass::add_user || User already exists [{$uid}]!  Sending to Auth_Pass::change_creds()");
 				return $this->change_creds($uid);
-			}
-			
-			//	Get new cert details, somehow.
-			
-			return $db->save_user($uid, array($config['db-userinfo-login'] => $username, $config['db-userinfo-password'] => $pass));
-		}
-		
-		public function change_creds ($uid) {
-			global $config, $db;
-			
-			if (!$db->get_user(array($config['db-userinfo-userid'] => $uid))) {
-				error_log ("Auth_Pass::change_creds || User does not already exist [{$uid}].  Sending to Auth_Pass::add_user()");
-				return $this->add_user($uid);
 			}
 			
 			//	Get new cert details, somehow.

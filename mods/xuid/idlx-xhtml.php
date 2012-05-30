@@ -34,13 +34,14 @@
 			
 			$idlx_root = $xp->evaluate("//idlx:iface");
 			foreach ($idlx_root as $idlx) {
-				if ($node->documentElement->isSameNode($idlx)) continue;
 				$out_children = $xp->evaluate("//idlx:iface//*[namespace-uri()!=\"".IDLX_NS_URI."\" and namespace-uri()!=namespace-uri(parent::*)]", $idlx);
 				foreach ($out_children as $out_node) {
-//					error_log("XUID_IDLX_XHTML::translate || Moving [{$out_node->tagName}] to before [{$idlx->tagName}]");
+					error_log("XUID_IDLX_XHTML::translate || Moving [{$out_node->tagName}] to end of [{$out_root->tagName}]");
+					if ($out_node->isSameNode($out_root)) continue;
 					$out_node->parentNode->removeChild($out_node);
-					$idlx->parentNode->insertBefore($out_node, $idlx);
+					$out_root->appendChild($out_node);
 				}
+				if ($node->documentElement->isSameNode($idlx)) continue;
 				$out_node = $idlx->ownerDocument->createTextNode($idlx->textContent);
 				$idlx->textContent = '';
 				$idlx->parentNode->insertBefore($out_node, $idlx);

@@ -35,6 +35,8 @@
 	$if_dom->formatOutput = true;
 	$if_dom->preserveWhiteSpace = false;
 	$if_dom->loadXML($main_iface);
+	$footer = $if_dom->importNode(get_footer(), true);
+	$if_dom->documentElement->appendChild($footer);
 	$xp = new DOMXPath($if_dom);
 	$xp->registerNamespace('idlx', IDLX_NS_URI);
 	$nothingNew = false;
@@ -42,6 +44,7 @@
 		$if_dom->formatOutput = true;
 		$if_dom->preserveWhiteSpace = false;
 		$if_dom->normalizeDocument();
+		error_log("index.php || Begin processing pass [{$if_dom->saveXML()}]");
 		$nothingNew = true;
 		
 		$iface_nodes  = $xp->evaluate('//idlx:interface');	//	Pull in any requested external Interfaces.
@@ -261,11 +264,13 @@
 		}
 	}
 	
+	error_log("index.php || Processing complete; commencing cleanup of IDLX artifacts [{$if_dom->saveXML()}]");
 	if (isset($xuid_mods[IDLX_NS_URI])) {
 		$if_dom = $xuid_mods[IDLX_NS_URI]->translate($if_dom);
 	}
+	error_log("index.php || Cleanup complete [{$if_dom->saveXML()}]");
 	
-	$if_dom->loadXML($if_dom->saveXML());
+	@$if_dom->loadXML($if_dom->saveXML());
 	$if_dom->formatOutput = true;
 	$if_dom->preserveWhiteSpace = false;
 	
