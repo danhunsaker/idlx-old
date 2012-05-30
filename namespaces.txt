@@ -1,0 +1,27 @@
+Namespaces in IDLX:
+
+IDLX uses namespaces to identify which XUID engine(s) to load, and what parts of an Interface to
+use it(/them) on.  Some namespaces are left as-is and sent directly to the UI platform - after any 
+appropriate processing, of course.  Namespaces are implemented automatically within the Framework 
+(that is, the Framework handles all the pesky namespace definition work automatically).  This is 
+done for three reasons.  First, it ensures that the XUID engine is processing a version of the 
+dialect it actually understands.  Second, it takes the burden of locating the schemas and their 
+extentions off the Interface developer, further simplifying the development process.  And third, it 
+makes implementing the XUID-identification logic much simpler.  So, what are the valid namespaces?  
+The full answer depends on what modules you have installed, but here's a list of the most common:
+
+ns:		|Module			|Description
+--------+---------------+---------------------------------------------------------------------------
+idlx	|core			|Framework interaction "glue".
+xhtml	|XUID_*XHTML*	|XHTML, the XML-compliant version of HTML.
+xforms	|XUID_*XForms*	|XForms, more powerful than regular (X)HTML forms.
+xul		|XUID_*XUL*		|XUL, the Mozilla Foundation's XUID, used in Firefox.
+xaml	|XUID_*XAML*	|XAML, Microsoft's response to the demand for a XUID in .NET
+
+Each module is responsible for defining the namespaces it supports, but is also expected to 
+cooperate with other modules which may have already been developed.  That means once a namespace 
+has been selected, new modules supporting that XUID are required to use the same one.  A good guide 
+for ensuring this isn't an issue is to use the common name for the XUID, as shown above.
+
+If you're using a WYSIWYG editor to generate your IDLX markup, ensure it follows these guidelines 
+as well!
