@@ -20,6 +20,8 @@
 	*/
 	
 	interface XUIDModule {
-		
+		static function get_handler();			//	Tells the core what namespace this module processes.
+		static function get_output_ns();		//	Tells the core what namespace this module produces.
+		function translate(DOMNode $node);		//	Takes the XUID $node and translates it to the desired output format.  Returns false on failure.
 	}
 ?>

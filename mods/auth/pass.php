@@ -13,8 +13,14 @@
 		public function auth (DBModule $db_module) {
 			global $config;			//	Need to use the database info from the current config, in case the database we're using has different names for these.
 			$realm = $config['auth-pass-realm'];
-			if (empty($_SERVER['PHP_AUTH_DIGEST'])) {		//	Check whether credentials have been supplied.
-				$_SESSION['nonce'] = uniqid();							//	They haven't; generate a nonce.
+			if (isset($_SESSION['user_id'])) return $_SESSION['user_id'];
+			if (!isset($_SESSION['nonce'])) {						//	Check whether a nonce was already set.
+				error_log ("Auth_Pass::auth || Session expired or user logged off.  Requesting new login.");		//	Nope.  Bad browser!
+				$_SESSION['nonce'] = uniqid();						//	It wasn't; generate one.
+				return $this->send_digest_request($realm);			//	Request credentials.
+			}
+			if (empty($_SERVER['PHP_AUTH_DIGEST'])) {				//	Check whether credentials have been supplied.
+				$_SESSION['nonce'] = uniqid();						//	They haven't; generate a nonce.
 				return $this->send_digest_request($realm);			//	Request credentials.
 			}
 			if (!($data = $this->http_digest_parse($_SERVER['PHP_AUTH_DIGEST']))) {		//	Credentials were supplied, but let's see if the browser returned them all...
@@ -68,8 +74,11 @@
 		
 		public function unauth() {
 			if (!isset($_SESSION['user_id'])) return false;
-			session_unset($_SESSION['user_id']);
-			session_unset($_SESSION['nonce']);
+			error_log ("Auth_Pass::unauth || Instructed to log out...");
+			unset($_SESSION['user_id']);
+			unset($_SESSION['nonce']);
+			header('HTTP/1.1 401 Unauthorized');
+			echo '<span style="font-size: 3em;">Successfully Logged Out</span>';
 			return true;
 		}
 	}

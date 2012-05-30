@@ -1,25 +1,37 @@
-<iface xmlns="https://localhost/idlx/idlx-schema/" xmlns:h="http://www.w3c.org/1999/xhtml/">
-	Hello, World!
-	<script lang="php">
-		echo 'Hello, World!  Let\'s run a few tests!';
-	</script>
-	<report>
-		<input>
-			<format>RDL</format>
-			<description>test-report.rdl</description>
-		</input>
-		<output>
-			<format>PDF</format>
-			<return>separate</return>
-			<name>test-report.pdf</name>
-		</output>
-	</report>
-	<table>UserInfo</table>
-	<record>UserID="1"</record>
-	<field>Login</field>
-	<h:html>
-		<h:head>
-			<h:title>IDLX Main Interface</h:title>
-		</h:head>
-	</h:html>
-</iface>
+<h:html xmlns="https://localhost/idlx/idlx-schema/" xmlns:h="http://www.w3c.org/1999/xhtml/">
+	<h:head>
+		<h:title>IDLX Main Interface</h:title>
+	</h:head>
+	<h:body>
+		<iface>
+			Hello, World!
+			<script lang="php">
+				<![CDATA[
+				echo 'Let\'s run a few tests!'."\n";
+				$api->db()->raw_sql("show tables");
+				echo '['.$api->db()->get_result_value(0, 0).']'."\n";
+				if (isset($api->_request['logout'])) {
+					echo '<logout />';
+				}
+				else {
+					echo '<a href="?logout=" xmlns="http://www.w3c.org/1999/xhtml/">Log Out</a>';
+				}
+				]]>
+			</script>
+			<report>
+				<input>
+					<format>RDL</format>
+					<description>test-report.rdl</description>
+				</input>
+				<output>
+					<format>PDF</format>
+					<return>separate</return>
+					<name>test-report.pdf</name>
+				</output>
+			</report>
+			<table>UserInfo</table>
+			<record>UserID="1"</record>
+			<field alt="--Username Not Found--">Login</field>
+		</iface>
+	</h:body>
+</h:html>

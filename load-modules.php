@@ -39,8 +39,24 @@
 	
 	$_SESSION['user_id'] = $uid;					//	User authenticated.  Store their UserID in the session.
 	
-	$report_mods = get_mods('reports');
-	$xuid_mods = get_mods('xuid');
-	$idlxs_mods = get_mods('idlxs');
+	$report_mods = get_mods('reports');				//	Pull in all the Report Modules of both types.
+	$rep_proc_mods = array();
+	$rep_gen_mods = array();
+	foreach ($report_mods as $key=>$mod) {				//	Segregate modules by type.
+		if (is_a($mod, 'ReportProcessor')) $rep_proc_mods[$key] = $mod;			//	ReportProcessor Modules
+		elseif (is_a($mod, 'ReportGenerator')) $rep_gen_mods[$key] = $mod;		//	ReportGenerator Modules
+	}
+	unset($report_mods);							//	Remove extraneous array.
+
+	$xuid_mods = get_mods('xuid');					//	Pull in all XUID modules.
+	$remove = array();
+	foreach ($xuid_mods as $key=>$xuid) {			//	Check which ones support our desired output format.
+		if ($xuid->get_output_ns() != $config['output']) $remove[] = $key;
+	}
+	foreach ($remove as $key) {						//	Remove XUID modules which we are guaranteed not to use.
+		unset($xuid_mods[$key]);
+	}
+
+	$idlxs_mods = get_mods('idlxs');				//	Pull in all IDLX-S modules.
 	
 ?>

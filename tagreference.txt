@@ -52,3 +52,7 @@ IDLX Tag Reference:
 										permit modification.  The field tag's alt attribute allows 
 										the Framework to provide a fallback value in case the user 
 										does not have read rights.
+<idlx:logout />						-	An empty tag which instructs the Framework to log out the 
+										current user.  Only one of these has any effect, but there 
+										is no upper limit on the number that can be in an Interface.
+<idlx:interface>					-	Pulls in another Interface, by CodeName.

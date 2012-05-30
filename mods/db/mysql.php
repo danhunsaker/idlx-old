@@ -176,8 +176,9 @@
 		}
 		
 		public function get_data_value ($table, $record, $field, $alt = false) {
-			global $config;
-			return $alt;
+			$result = $this->raw_sql("select `{$field}` from `{$table}` where {$record}");
+			if ($result === false) return $alt;
+			return $this->get_result_value($field, 0);
 		}
 		
 	}

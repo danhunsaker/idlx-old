@@ -1,5 +1,11 @@
+Options FollowSymLinks
+
+RewriteEngine on
+RewriteCond  %{HTTPS} ^off$
+RewriteCond  %{HTTP_HOST}%{REQUEST_URI} (.*)
+RewriteRule  (.*) https://%1 [L,R]
+
 SSLVerifyClient				optional
-SSLRequireSSL
 SSLVerifyDepth				4
 SSLOptions					+ExportCertData
 SSLRequire					%{SSL_CIPHER_USEKEYSIZE} >= 128

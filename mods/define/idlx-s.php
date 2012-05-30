@@ -6,6 +6,7 @@
 	*/
 	
 	interface IDLXSModule {
+		static function get_handler();
 		public function run_script ($script);							//	Runs the script and returns the output.
 	}
 ?>

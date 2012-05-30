@@ -13,6 +13,10 @@
 			'user' => 'idlx-default',
 			'pass' => 'idlx-password',
 			'name' => 'idlx',
+			'scripts' => array (							//	Scripts should use a different username and password, so as to limit what the DB will allow them to do.
+				'user' => 'idlx-scripts',					//	So, we set a separate username here...
+				'pass' => 'idlx-scripts-password',			//	...and a separate password here.
+			),												//	
 			'userinfo' => array (							//	These are the default names for the various IDLX-defined tables and their fields.  These are set in case a Project needs to override them.
 				'tablename' => 'UserInfo',					//	
 				'userid' => 'UserID',						//	The UserInfo table only mandates the presence of a UserID field.  Each Auth_ module is responsible for defining other fields for authentication.
@@ -57,7 +61,8 @@
 				'groupid' => 'GroupID',						//	
 			),												//	--------------------------------------------------------------------------------------------------------------
 		),
-		'output' => 'Web',									//	The output type; this case defines XHTML+CSS+JS.  Only one value can be set for a given project.  To support multiple methods, use a dynamically-set value in place of a hard-coded one.
+		'output' => 'http://www.w3c.org/1999/xhtml/',		//	The output type; this case defines XHTML+CSS+JS.  Only one value can be set for a given project.
+															//	To support multiple methods depending on UI platform, use a dynamically-set value in place of a hard-coded one.
 		'auth' => array (
 			'engine' => array (								//	auth-engine supports a fallback mechanism:
 				0 => 'CLO',									//	auth-engine-0 is the default auth mechanism,
