@@ -31,8 +31,21 @@
 			foreach ($flist as $fname) {
 				//	Skip UNIX-style hidden files, all directories, and any non-PHP files.
 				if (substr($fname, 0, 1) == '.' || is_dir($fname) || substr($fname, -4) != '.php') continue;
+				error_log("util-functions.php - get_mods || Loading module [mods/{$mod_type}/{$fname}]");
 				$class_name = include_once("mods/{$mod_type}/{$fname}");		//	Module files will have to return(class_name); at their end.
-				$output[] = new $class_name();
+				if (class_exists($class_name)) {
+					error_log("util-functions.php - get_mods || Class name [{$class_name}]");
+					$output[] = new $class_name();
+				}
+				else {															//	But if they violate this rule, try to make things work anyway.
+					error_log("util-functions.php - get_mods || Class name INVALID [{$class_name}] - add a return('Name_of_Class') to the end of [mods/{$mod_type}/{$fname}].");
+					$class_name = "{$mod_type}_".substr($fname,0,-4);
+					if (class_exists($class_name)) {
+						error_log("util-functions.php - get_mods || Retrying with class name [{$class_name}]");
+						$output[] = new $class_name();
+					}
+					else error_log("util-functions.php - get_mods || Cannot determine class name [{$class_name}]");
+				}
 			}
 			return $output;
 		}

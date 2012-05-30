@@ -41,6 +41,6 @@
 	
 	$report_mods = get_mods('reports');
 	$xuid_mods = get_mods('xuid');
-	$idlxs_mods = get_mods('idlx-s');
+	$idlxs_mods = get_mods('idlxs');
 	
 ?>

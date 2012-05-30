@@ -1,0 +1,54 @@
+IDLX Tag Reference:
+
+<idlx:iface>						-	The root element.
+<idlx:script lang="">				-	IDLX-S modules are triggered by these blocks.  The specific
+										module to use is indicated, in full lowercase, in the lang
+										attribute.  Keep in mind that any XML within these blocks 
+										will only be processed after the script has run, so it must 
+										survive script execution to be evaluated.  (This allows 
+										script blocks to return full Interfaces, if needed, or even 
+										other script blocks.)
+<idlx:report>						-	Report modules are triggered by these blocks.
+	<idlx:input>					-	Defines the report to process.
+		<idlx:format>				-	Identifies which Reports Module to use.
+		<idlx:description>			-	Identifies the report description file to use.
+	<idlx:output>					-	Defines the way to present the report to the user.
+		<idlx:format>				-	Identifies the desired output format (i.e., PDF).
+		<idlx:return>				-	Identifies the desired method for presenting the finished
+										report to the user.  Valid values:
+											interface	::	Present the report within the UI.
+											separate	::	Present the report as a download (or a 
+															"save as" outside a web interface).
+											link		::	Present the report as a hyperlink (or 
+															something similar in non-web contexts).
+											local		::	Store the report in the Project 
+															directories for later use.  Like link, 
+															but does not provide direct access in 
+															the Interface itself.
+											test		::	Don't actually present the report.
+										Possible extended values, assuming module/Project support:
+											email		::	Email the report to the user.
+											print		::	Print the report.  Printer in name tag.
+										Of course, any module can define its own values, though it 
+										must register them with the core.
+		<idlx:name>					-	Provides a filename hint for the final report, when valid.
+<idlx:asis>							-	Identifies a block of text that should not be interpreted
+										as IDLX code.  These blocks must always be CDATA to avoid 
+										confusing the XML parser.  This allows passing raw XML and 
+										text all the way through to the UI platform.  The asis tag 
+										and CDATA delimiters will be stripped from the output.
+<idlx:table>						-	Identifies a table to pull data from.  This table is used 
+										until another table tag is encountered.
+<idlx:record>						-	Identifies a record to pull data from.  This record is used 
+										until the parser encounters either a table tag or another
+										record tag.
+<idlx:field alt="">					-	Identifies a field to pull data from.  The XUID engine is 
+										responsible for determining whether the user has sufficient 
+										access rights to allow the field to be used in the manner 
+										which it was defined.  That is, if a field tag is used in a 
+										XUID element which allows the user to modify the value, the 
+										engine is responsible for disabling that element's editing 
+										capability if the user doesn't have sufficient access to 
+										permit modification.  The field tag's alt attribute allows 
+										the Framework to provide a fallback value in case the user 
+										does not have read rights.

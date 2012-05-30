@@ -6,6 +6,6 @@
 	*/
 	
 	interface IDLXSModule {
-		function run_script ($script);		//	Runs the script and returns the output.
+		public function run_script ($script);							//	Runs the script and returns the output.
 	}
 ?>

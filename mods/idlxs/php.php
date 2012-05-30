@@ -16,4 +16,6 @@
 			return $output;
 		}
 	}
+	
+	return 'IDLXS_PHP';
 ?>

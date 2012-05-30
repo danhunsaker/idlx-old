@@ -1,0 +1,25 @@
+<iface xmlns="https://localhost/idlx/idlx-schema/" xmlns:h="http://www.w3c.org/1999/xhtml/">
+	Hello, World!
+	<script lang="php">
+		echo 'Hello, World!  Let\'s run a few tests!';
+	</script>
+	<report>
+		<input>
+			<format>RDL</format>
+			<description>test-report.rdl</description>
+		</input>
+		<output>
+			<format>PDF</format>
+			<return>separate</return>
+			<name>test-report.pdf</name>
+		</output>
+	</report>
+	<table>UserInfo</table>
+	<record>UserID="1"</record>
+	<field>Login</field>
+	<h:html>
+		<h:head>
+			<h:title>IDLX Main Interface</h:title>
+		</h:head>
+	</h:html>
+</iface>

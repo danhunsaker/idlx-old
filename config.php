@@ -30,7 +30,7 @@
 				'id' => 'ID',								//	
 				'permname' => 'PermName',					//	
 				'interfaceid' => 'InterfaceID',				//	
-				'tablename' => 'TableName',					//	
+				'tblname' => 'TableName',					//	
 				'fieldname' => 'FieldName',					//	
 				'parentperm' => 'ParentPerm',				//	
 				'details' => 'Details',						//	
