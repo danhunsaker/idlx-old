@@ -24,6 +24,20 @@
 		}
 		
 		public function user_add_update ($uid) {
+			global $config, $db;
+			
+			if ($uid === null) {
+				$uid = uniqid('idlx'.dechex(crc32($_SERVER['SERVER_NAME'])+0), true);		//	35 characters long!
+				error_log ("Auth_CLO::user_add_update || UserID passed was NULL.  Generating one.  [{$uid}]");
+			}
+			
+			if (!$db->get_user(array($config['db-userinfo-userid'] => $uid))) {
+				error_log ("Auth_CLO::user_add_update || User doesn't yet exist [{$uid}].");
+			}
+			
+			//	Get new cred details, somehow.
+			
+			return $db->save_user($uid, array($config['db-userinfo-login'] => $user, $config['db-userinfo-password'] => $pass));
 		}
 	}
 ?>

@@ -178,6 +178,7 @@ function ntlm_parse_response_msg($msg, $challenge, $get_ntlm_user_hash_callback,
 
 function ntlm_unset_auth() {
 	unset ($_SESSION['_ntlm_auth']);
+	header('HTTP/1.1 401 Unauthorized');
 }
 
 function ntlm_prompt($targetname, $domain, $computer, $dnsdomain, $dnscomputer, $get_ntlm_user_hash_callback, $ntlm_verify_hash_callback = 'ntlm_verify_hash', $failmsg = "<h1>Authentication Required</h1>") {

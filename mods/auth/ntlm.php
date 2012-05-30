@@ -61,7 +61,7 @@
 			$this->pass = null;
 			unset($_SESSION['user_id']);
 			header('HTTP/1.1 401 Unauthorized');
-			echo '<span style="font-size: 3em;">Successfully Logged Out</span>';
+//			echo '<span style="font-size: 3em;">Successfully Logged Out</span>';
 			session_unset();
 			session_destroy();
 			return true;
@@ -85,8 +85,7 @@
 				error_log ("Auth_NTLM::user_add_update || User doesn't yet exist [{$uid}].");
 			}
 			
-			//	Get new cert details, somehow.
-			//	Probably by calling a function to get them, since the process here and in ::change_creds is the same...
+			//	Get new cred details, somehow.
 			
 			return $db->save_user($uid, array($config['db-userinfo-login'] => $user, $config['db-userinfo-password'] => $pass));
 		}

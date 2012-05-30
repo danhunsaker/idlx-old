@@ -78,21 +78,25 @@
 			unset($_SESSION['user_id']);
 			unset($_SESSION['nonce']);
 			header('HTTP/1.1 401 Unauthorized');
-			echo '<span style="font-size: 3em;">Successfully Logged Out</span>';
+//			echo '<span style="font-size: 3em;">Successfully Logged Out</span>';
 			return true;
 		}
 		
 		public function user_add_update ($uid) {
 			global $config, $db;
 			
-			if (!$db->get_user(array($config['db-userinfo-userid'] => $uid))) {
-				error_log ("Auth_Pass::add_user || User already exists [{$uid}]!  Sending to Auth_Pass::change_creds()");
-				return $this->change_creds($uid);
+			if ($uid === null) {
+				$uid = uniqid('idlx'.dechex(crc32($_SERVER['SERVER_NAME'])+0), true);		//	35 characters long!
+				error_log ("Auth_Pass::user_add_update || UserID passed was NULL.  Generating one.  [{$uid}]");
 			}
 			
-			//	Get new cert details, somehow.
+			if (!$db->get_user(array($config['db-userinfo-userid'] => $uid))) {
+				error_log ("Auth_Pass::user_add_update || User doesn't yet exist [{$uid}].");
+			}
 			
-			return $db->save_user($uid, array($config['db-userinfo-login'] => $username, $config['db-userinfo-password'] => $pass));
+			//	Get new cred details, somehow.
+			
+			return $db->save_user($uid, array($config['db-userinfo-login'] => $user, $config['db-userinfo-password'] => $pass));
 		}
 		
 	}
