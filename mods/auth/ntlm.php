@@ -20,25 +20,23 @@
 		public function auth (DBModule $db_module) {		//	Authenticates the user.  If a user is already authenticated, don't re-auth, just return.  Return value is the user's ID, or false on failure.
 			global $config, $ldap;
 			
-			error_log("Auth_NTLM::auth || Requesting NTLM credentials.");
+//			error_log("Auth_NTLM::auth || Requesting NTLM credentials.");
 			$auth = ntlm_prompt('IDLX Framework', $config['auth-ntlm-domain'], $config['auth-ntlm-server'], $config['auth-ntlm-domain'], $config['auth-ntlm-server'], 'ntlm_auth_user_hash');
 			
 			if ($auth['authenticated'] === true) {
 				if ($config['auth-ntlm-ldap']) {
-					include_once('mods/auth/_ldap_.php');
+					include_once('support/idlx_ldap_helper.php');
 					$ldap = new _LDAP_Verify_();
 					$authed = $ldap->verify_auth($this->user, $this->pass);
-					if ($authed) error_log("Auth_NTLM::auth || Auth succeeded against LDAP!");
+//					if ($authed) error_log("Auth_NTLM::auth || Auth succeeded against LDAP!");
 				}
 				else {
-					error_log("Auth_NTLM::auth || Auth succeeded against DB!");
+//					error_log("Auth_NTLM::auth || Auth succeeded against DB!");
 					$authed = true;
 				}
 				
 				if ($authed) {
 					$db_module->get_user(array($config['db-userinfo-login'] => $this->user, $config['db-userinfo-password'] => $this->pass));
-					$this->user = null;
-					$this->pass = null;
 				}
 				else {
 					error_log("Auth_NTLM::auth || LDAP auth verification failed!");
@@ -49,16 +47,18 @@
 			}
 			else {
 				error_log("Auth_NTLM::auth || Auth failed! [".var_export($auth, true)."]");
-				$this->user = null;
-				$this->pass = null;
+					$this->user = null;
+					$this->pass = null;
 				return false;
 			}
 		}
 		
 		public function unauth () {							//	Clears any user authentication information, effectively logging the user out.  No return value.
 			if (!isset($_SESSION['user_id'])) return false;
-			error_log ("Auth_NTLM::unauth || Instructed to log out...");
+//			error_log ("Auth_NTLM::unauth || Instructed to log out...");
 			ntlm_unset_auth();
+			$this->user = null;
+			$this->pass = null;
 			unset($_SESSION['user_id']);
 			header('HTTP/1.1 401 Unauthorized');
 			echo '<span style="font-size: 3em;">Successfully Logged Out</span>';
@@ -71,12 +71,37 @@
 			return true;
 		}
 		
+		public function add_user ($uid) {
+			global $config, $db;
+			
+			if (!$db->get_user(array($config['db-userinfo-userid'] => $uid))) {
+				error_log ("Auth_NTLM::add_user || User already exists [{$uid}]!  Sending to Auth_NTLM::change_creds()");
+				return $this->change_creds($uid);
+			}
+			
+			//	Get new cert details, somehow.
+			
+			return $db->save_user($uid, array($config['db-userinfo-login'] => $this->user, $config['db-userinfo-password'] => $this->pass));
+		}
+		
+		public function change_creds ($uid) {
+			global $config, $db;
+			
+			if (!$db->get_user(array($config['db-userinfo-userid'] => $uid))) {
+				error_log ("Auth_NTLM::change_creds || User does not already exist [{$uid}].  Sending to Auth_NTLM::add_user()");
+				return $this->add_user($uid);
+			}
+			
+			//	Get new cert details, somehow.
+			
+			return $db->save_user($uid, array($config['db-userinfo-login'] => $this->user, $config['db-userinfo-password'] => $this->pass));
+		}
 	}
 	
 	function ntlm_auth_user_hash ($user) {
 		global $config, $db, $auth;
 		
-		error_log("Auth_NTLM  ntlm_auth_user_hash || NTLM request [{$user}]");
+//		error_log("Auth_NTLM  ntlm_auth_user_hash || NTLM request [{$user}]");
 		
 		$user_exists = $db->raw_sql("select AES_DECRYPT(`{$config['db-userinfo-password']}`, '{$config['db-encryption-password']}') as {$config['db-userinfo-password']} from `{$config['db-userinfo-tablename']}` where `{$config['db-userinfo-login']}`=\"{$user}\"");
 		if ($user_exists === false) {

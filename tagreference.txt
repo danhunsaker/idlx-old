@@ -1,6 +1,7 @@
 IDLX Tag Reference:
 
-<idlx:iface>						-	The root element.
+<idlx:iface>						-	The root element.  This should only be used in the "main" 
+										Interface.
 <idlx:script lang="">				-	IDLX-S modules are triggered by these blocks.  The specific
 										module to use is indicated, in full lowercase, in the lang
 										attribute.  Keep in mind that any XML within these blocks 
@@ -55,4 +56,5 @@ IDLX Tag Reference:
 <idlx:logout />						-	An empty tag which instructs the Framework to log out the 
 										current user.  Only one of these has any effect, but there 
 										is no upper limit on the number that can be in an Interface.
-<idlx:interface>					-	Pulls in another Interface, by CodeName.
+<idlx:interface>					-	Pulls in another Interface, by CodeName.  Use a script to 
+										bring in an Interface in a file (for now?).

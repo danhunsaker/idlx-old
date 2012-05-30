@@ -15,7 +15,7 @@
 	
 	include_once('mods/db/'.mb_strtolower($config['db-engine']).'.php');
 	$db_class = 'DB_'.$config['db-engine'];
-	error_log ("load-modules.php || Connecting to database with {$db_class}");
+//	error_log ("load-modules.php || Connecting to database with {$db_class}");
 	$db = new $db_class($config['db-host'], $config['db-user'], $config['db-pass'], $config['db-name']);
 	
 	$uid = false;
@@ -23,7 +23,7 @@
 		$auth_engine = $config['auth-engine-'.$mod_i];
 		include_once('mods/auth/'.mb_strtolower($auth_engine).'.php');
 		$auth_class = 'Auth_'.$auth_engine;
-		error_log ("load-modules.php || Trying to auth with {$auth_class} [{$mod_i}]");
+//		error_log ("load-modules.php || Trying to auth with {$auth_class} [{$mod_i}]");
 		$auth = new $auth_class();
 		
 		$uid = $auth->auth($db);
@@ -32,6 +32,7 @@
 	}
 	
 	if ($uid === false) {
+		error_log ("load-modules.php || User authentication failed.  Stopping execution now.");
 		die ('User authentication failed.');
 	}
 	

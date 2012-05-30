@@ -15,13 +15,14 @@
 				$this->results = new PDOStatement();
 			}
 			catch (PDOException $e) {
+				error_log('DB_MySQL::__construct || Connection Failed! [' . $e->getMessage() . ']');
 				die ('Connection Failed! [' . $e->getMessage() . ']');
 				return false;
 			}
 		}
 		
 		public function raw_sql ($sql_query) {
-			error_log ("DB_MySQL::raw_sql || Running raw SQL query [{$sql_query}].");
+//			error_log ("DB_MySQL::raw_sql || Running raw SQL query [{$sql_query}].");
 			try {
 				do $this->results->fetchAll(); while ($this->results->nextRowSet());		//	Navigate through any unused results so the connection is available again.
 				$this->results = $this->con->query($sql_query);
@@ -35,7 +36,7 @@
 		}
 		
 		public function get_result_value ($column, $row) {
-			error_log ("DB_MySQL::get_result_value || Fetching column [{$column}] row [{$row}].");
+//			error_log ("DB_MySQL::get_result_value || Fetching column [{$column}] row [{$row}].");
 			$res = $this->results->fetch(PDO::FETCH_BOTH, PDO::FETCH_ORI_ABS, $row);
 			return isset($res[$column]) ? $res[$column] : false;
 		}
@@ -71,7 +72,7 @@
 		
 		public function get_iface_cname ($cname) {
 			global $config;
-			if (($this->acl_iface($cname) & 1) == 0) return false;
+			if (($this->acl_iface($cname) & 1) == 0) return false;		//	Check for read rights.
 			$found_iface = $this->raw_sql("select `{$config['db-interfaces-codeblock']}` from `{$config['db-interfaces-tablename']}` where `{$config['db-interfaces-codename']}`=\"{$cname}\"");
 			if ($found_iface) {
 				return $this->get_result_value($config['db-interfaces-codeblock'], 0);
@@ -163,7 +164,7 @@
 			
 			//	Finally, calculate a Perm value based on all the ACLs, remembering that entries closer to the user/object override those further up.
 			$acl_final = $acls[0];
-			error_log("DB_MySQL::acl_check || ACLS [".var_export($acls, true)."] :: [{$acl_final}]");
+//			error_log("DB_MySQL::acl_check || ACLS [".var_export($acls, true)."] :: [{$acl_final}]");
 			
 			return $acl_final;
 		}
@@ -181,6 +182,7 @@
 		}
 		
 		public function get_data_value ($table, $record, $field, $alt = false) {
+			if ((($this->acl_field($table, $field) & 1) == 0) || (($this->acl_table($table) & 1) == 0)) return $alt;		//	Check for read rights.
 			$result = $this->raw_sql("select `{$field}` from `{$table}` where {$record}");
 			if ($result === false) return $alt;
 			return $this->get_result_value($field, 0);

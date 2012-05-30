@@ -22,8 +22,12 @@
 			$xp->registerNamespace('xhtml', self::out_ns);
 			
 			$out_root = $xp->evaluate("//xhtml:html");
-			if ($out_root->length != 1) {
+			if ($out_root->length > 1) {
 				error_log("XUID_IDLX_XHTML::translate || Too many XHTML root elements!  Returning full input instead of processing.");
+				return $node;
+			}
+			elseif ($out_root->length == 0) {
+				error_log("XUID_IDLX_XHTML::translate || No XHTML root elements!  Returning full input instead of processing.");
 				return $node;
 			}
 			$out_root = $out_root->item(0);
@@ -33,7 +37,7 @@
 				if ($node->documentElement->isSameNode($idlx)) continue;
 				$out_children = $xp->evaluate("//idlx:iface//*[namespace-uri()!=\"".IDLX_NS_URI."\" and namespace-uri()!=namespace-uri(parent::*)]", $idlx);
 				foreach ($out_children as $out_node) {
-					error_log("XUID_IDLX_XHTML::translate || Moving [{$out_node->tagName}] to before [{$idlx->tagName}]");
+//					error_log("XUID_IDLX_XHTML::translate || Moving [{$out_node->tagName}] to before [{$idlx->tagName}]");
 					$out_node->parentNode->removeChild($out_node);
 					$idlx->parentNode->insertBefore($out_node, $idlx);
 				}
@@ -44,13 +48,17 @@
 			}
 
 			if (!$node->documentElement->isSameNode($out_root)) {
-				error_log("XUID_IDLX_XHTML::translate || Moving output node to root position.  All done here!");
+//				error_log("XUID_IDLX_XHTML::translate || Moving output node to root position.  All done here!");
 				$node->replaceChild($out_root, $node->documentElement);
 			}
 			
 			//	Now clean up the document so the default namespace is correct.
 			$prefix = $node->lookupPrefix(self::out_ns);
 			$node->documentElement->removeAttributeNS(self::out_ns, $prefix);
+
+			//	And remove the IDLX namespace, if it's still hanging around.
+			$prefix = $node->lookupPrefix(IDLX_NS_URI);
+			$node->documentElement->removeAttributeNS(IDLX_NS_URI, $prefix);
 			
 			return $node;
 		}

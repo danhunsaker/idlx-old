@@ -187,9 +187,9 @@ function ntlm_prompt($targetname, $domain, $computer, $dnsdomain, $dnscomputer, 
 		$auth_header = isset($headers['Authorization']) ? $headers['Authorization'] : null;
 	}
 	
-/*	if (isset($_SESSION['_ntlm_auth']))
+	if (isset($_SESSION['_ntlm_auth']))
 		return $_SESSION['_ntlm_auth'];
-*/	
+	
 	// post data retention, looks like not needed	
 	/*if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 		$_SESSION['_ntlm_post_data'] = $_POST;
@@ -203,16 +203,16 @@ function ntlm_prompt($targetname, $domain, $computer, $dnsdomain, $dnscomputer, 
 	}
 
 	if (substr($auth_header,0,5) == 'NTLM ') {
-		error_log("ntlm.php ntlm_prompt || Processing NTLM header.");
+//		error_log("ntlm.php ntlm_prompt || Processing NTLM header.");
 		$msg = base64_decode(substr($auth_header, 5));
 		if (substr($msg, 0, 8) != "NTLMSSP\x00") {
 			error_log("ntlm.php ntlm_prompt || Error Header.  Dying.");
-//			unset($_SESSION['_ntlm_post_data']);
+			unset($_SESSION['_ntlm_post_data']);
 			die('NTLM error header not recognised');
 		}
 
 		if ($msg[8] == "\x01") {
-			error_log("ntlm.php ntlm_prompt || Sending server challenge.");
+//			error_log("ntlm.php ntlm_prompt || Sending server challenge.");
 			$_SESSION['_ntlm_server_challenge'] = ntlm_get_random_bytes(8);
 			header('HTTP/1.1 401 Unauthorized');
 			$msg2 = ntlm_get_challenge_msg($msg, $_SESSION['_ntlm_server_challenge'], $targetname, $domain, $computer, $dnsdomain, $dnscomputer);
@@ -221,22 +221,22 @@ function ntlm_prompt($targetname, $domain, $computer, $dnsdomain, $dnscomputer, 
 			exit;
 		}
 		else if ($msg[8] == "\x03") {
-			error_log("ntlm.php ntlm_prompt || Calling message parser.");
+//			error_log("ntlm.php ntlm_prompt || Calling message parser.");
 			$auth = ntlm_parse_response_msg($msg, $_SESSION['_ntlm_server_challenge'], $get_ntlm_user_hash_callback, $ntlm_verify_hash_callback);
 			unset($_SESSION['_ntlm_server_challenge']);
 			
-			error_log("ntlm.php ntlm_prompt || Checking authentication status.");
-			if (!$auth['authenticated']) {
+//			error_log("ntlm.php ntlm_prompt || Checking authentication status.");
+/*			if (!$auth['authenticated']) {
 				header('HTTP/1.1 401 Unauthorized');
 				header('WWW-Authenticate: NTLM');
 				//unset($_SESSION['_ntlm_post_data']);
 				print $failmsg;
 				exit;
 			}
-/*			else {
-				$_SESSION['_ntlm_auth'] = $auth;
-			}
-*/
+			else {
+*/				$_SESSION['_ntlm_auth'] = $auth;
+//			}
+
 			// post data retention looks like not needed
 			/*if (isset($_SESSION['_ntlm_post_data'])) {
 				foreach ($_SESSION['_ntlm_post_data'] as $k => $v) {
@@ -247,12 +247,12 @@ function ntlm_prompt($targetname, $domain, $computer, $dnsdomain, $dnscomputer, 
 				unset($_SESSION['_ntlm_post_data']);
 			}*/
 			
-			error_log("ntlm.php ntlm_prompt || Returning \$auth.");
+//			error_log("ntlm.php ntlm_prompt || Returning \$auth.");
 			return $auth;
 		}
 	}
 	else {
-		error_log("ntlm.php ntlm_prompt || Non-NTLM header!");
+//		error_log("ntlm.php ntlm_prompt || Non-NTLM header!");
 		return array('authenticated' => false);
 	}
 }
