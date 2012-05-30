@@ -6,6 +6,7 @@
 	*/
 
 	if (!isset($config['db-userinfo-certdn'])) $config['db-userinfo-certdn'] = 'CertDN';
+	if (!isset($config['auth-clo-ldap'])) $config['auth-clo-ldap'] = false;
 	
 	class Auth_CLO implements AuthModule {
 		public function auth (DBModule $db_module) {

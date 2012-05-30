@@ -18,19 +18,17 @@
 	error_log ("load-modules.php || Connecting to database with {$db_class}");
 	$db = new $db_class($config['db-host'], $config['db-user'], $config['db-pass'], $config['db-name']);
 	
-	$i = 0;
 	$uid = false;
-	while (isset($config['auth-engine-'.$i])) {
-		include_once('mods/auth/'.mb_strtolower($config['auth-engine-'.$i]).'.php');
-		$auth_class = 'Auth_'.$config['auth-engine-'.$i];
-		error_log ("load-modules.php || Trying to auth with {$auth_class}");
+	for ($mod_i = 0; isset($config['auth-engine-'.$mod_i]); $mod_i++) {
+		$auth_engine = $config['auth-engine-'.$mod_i];
+		include_once('mods/auth/'.mb_strtolower($auth_engine).'.php');
+		$auth_class = 'Auth_'.$auth_engine;
+		error_log ("load-modules.php || Trying to auth with {$auth_class} [{$mod_i}]");
 		$auth = new $auth_class();
 		
 		$uid = $auth->auth($db);
 		if ($uid !== false)
 			break;
-		
-		$i++;
 	}
 	
 	if ($uid === false) {
@@ -47,11 +45,17 @@
 		elseif (is_a($mod, 'ReportGenerator')) $rep_gen_mods[$key] = $mod;		//	ReportGenerator Modules
 	}
 	unset($report_mods);							//	Remove extraneous array.
-
+	
+	$config['output'] = array();					//	Uncollapse the list of desired output formats.
+	for ($out_i = 0; isset($config["output-{$out_i}"]); $out_i++) {
+		$config['output'][$out_i] = $config["output-{$out_i}"];
+		unset($config["output-{$out_i}"]);
+	}
+	
 	$xuid_mods = get_mods('xuid');					//	Pull in all XUID modules.
 	$remove = array();
-	foreach ($xuid_mods as $key=>$xuid) {			//	Check which ones support our desired output format.
-		if ($xuid->get_output_ns() != $config['output']) $remove[] = $key;
+	foreach ($xuid_mods as $key=>$xuid) {			//	Check which ones support our desired output formats.
+		if (!in_array($xuid->get_output_ns(), $config['output'])) $remove[] = $key;
 	}
 	foreach ($remove as $key) {						//	Remove XUID modules which we are guaranteed not to use.
 		unset($xuid_mods[$key]);

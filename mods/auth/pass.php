@@ -5,15 +5,14 @@
 		Contains the Password Auth module.
 	*/
 	
-	if (!isset($config['db-userinfo-login'])) $config['db-userinfo-login'] = 'Login';
-	if (!isset($config['db-userinfo-password'])) $config['db-userinfo-password'] = 'Password';
 	if (!isset($config['auth-pass-realm'])) $config['auth-pass-realm'] = 'IDLX Framework';
+	if (!isset($config['auth-pass-ldap'])) $config['auth-pass-ldap'] = false;
 	
 	class Auth_Pass implements AuthModule {
 		public function auth (DBModule $db_module) {
 			global $config;			//	Need to use the database info from the current config, in case the database we're using has different names for these.
 			$realm = $config['auth-pass-realm'];
-			if (isset($_SESSION['user_id'])) return $_SESSION['user_id'];
+//			if (isset($_SESSION['user_id'])) return $_SESSION['user_id'];
 			if (!isset($_SESSION['nonce'])) {						//	Check whether a nonce was already set.
 				error_log ("Auth_Pass::auth || Session expired or user logged off.  Requesting new login.");		//	Nope.  Bad browser!
 				$_SESSION['nonce'] = uniqid();						//	It wasn't; generate one.
@@ -27,14 +26,15 @@
 				error_log ("Auth_Pass::auth || Digest Auth failed to provide valid data [{$_SERVER['PHP_AUTH_DIGEST']}]");		//	Nope.  Bad browser!
 				return $this->send_digest_request($realm);			//	Request new credentials.
 			}
-			$user_exists = $db_module->raw_sql("select `{$config['db-userinfo-password']}` from `{$config['db-userinfo-tablename']}` where `{$config['db-userinfo-login']}`=\"{$data['username']}\"");
+			$user_exists = $db_module->raw_sql("select AES_DECRYPT(`{$config['db-userinfo-password']}`, '{$config['db-encryption-password']}') as {$config['db-userinfo-password']} from `{$config['db-userinfo-tablename']}` where `{$config['db-userinfo-login']}`=\"{$data['username']}\"");
 			if ($user_exists === false) {
 				error_log ("Auth_Pass::auth || Username [{$data['username']}] not in database.");
 				return $this->send_digest_request($realm);			//	Request new credentials.
 			}
-			$pass = $db_module->get_result_value($config['db-userinfo-password'], 0);		//	Because storing unencrypted passwords in the database is inherently dangerous, $pass is equivalent to the A1 section of a Digest Auth response.
+			$pass = $db_module->get_result_value($config['db-userinfo-password'], 0);		//	Because storing unencrypted passwords in the database is inherently dangerous, $pass is encrypted.
+			$a1 = md5("{$data['username']}:{$realm}:{$pass}");
 			$a2 = md5("{$_SERVER['REQUEST_METHOD']}:{$data['uri']}");
-			$valid_response = md5("{$pass}:{$_SESSION['nonce']}:{$data['nc']}:{$data['cnonce']}:{$data['qop']}:{$a2}");
+			$valid_response = md5("{$a1}:{$_SESSION['nonce']}:{$data['nc']}:{$data['cnonce']}:{$data['qop']}:{$a2}");
 			if ($data['response'] != $valid_response) {
 				error_log ("Auth_Pass::auth || Incorrect username/password combination. [{$data['response']} || {$valid_response} || {$_SERVER['PHP_AUTH_DIGEST']}]");
 				return $this->send_digest_request($realm);			//	Request new credentials.

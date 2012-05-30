@@ -39,6 +39,8 @@
 	$xp->registerNamespace('idlx', IDLX_NS_URI);
 	$nothingNew = false;
 	while ($nothingNew == false) {
+		$if_dom->formatOutput = true;
+		$if_dom->preserveWhiteSpace = false;
 		$if_dom->normalizeDocument();
 		$nothingNew = true;
 		
@@ -201,6 +203,8 @@
 					$result = $db->get_data_value($data_table, $data_record, $data_field, $data_alt);
 					$new_node = importFragment(utf8_encode(trim($result)), $node->ownerDocument);
 					$node->parentNode->replaceChild($new_node, $node);
+					$node->ownerDocument->formatOutput = true;
+					$node->ownerDocument->preserveWhiteSpace = false;
 					$node->ownerDocument->normalizeDocument();
 					break;
 				default:
@@ -213,7 +217,8 @@
 		}
 		
 		//	Locate and process XUID nodes.
-		$xuid_nodes   = $xp->evaluate('//*[namespace-uri()!="'.IDLX_NS_URI.'" and namespace-uri()!="'.$config['output'].'" and namespace-uri()!=namespace-uri(parent::*)]');
+		$xuid_xpath = '//*[namespace-uri()!="'.IDLX_NS_URI.'" and namespace-uri()!="'.implode('" and namespace-uri()!="', $config['output']).'" and namespace-uri()!=namespace-uri(parent::*)]';
+		$xuid_nodes   = $xp->evaluate($xuid_xpath);
 		error_log("index.php || Tag counts: xuid blocks [{$xuid_nodes->length}]");
 		if ($xuid_nodes->length > 0) {
 			$nothingNew = false;
@@ -249,9 +254,7 @@
 		$if_dom = $xuid_mods[IDLX_NS_URI]->translate($if_dom);
 	}
 	
-	$if_dom->formatOutput = true;
-	$if_dom->preserveWhiteSpace = false;
-	$if_dom->normalizeDocument();
+	$if_dom->loadXML($if_dom->saveXML());
 	$if_dom->formatOutput = true;
 	$if_dom->preserveWhiteSpace = false;
 	echo $if_dom->saveXML();

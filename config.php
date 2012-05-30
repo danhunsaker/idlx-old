@@ -4,6 +4,9 @@
 	/** config.php
 		Provides configuration information for the IDLX Framework.
 		Project-specific settings will override server-wide settings given here.
+		You will probably be building Projects on top of the Framework, and should
+		use the Project-level config.php to set these, as well as any required by
+		the modules you decide to use.
 	*/
 
 	$server_config = array (
@@ -13,13 +16,16 @@
 			'user' => 'idlx-default',
 			'pass' => 'idlx-password',
 			'name' => 'idlx',
+			'encryption-password' => 'idlx-encrypt',		//	YOU WANT TO CHANGE THIS!  YOU SHOULD ALSO USE SOMETHING DIFFERENT IN YOUR PROJECT CONFIGS!
 			'scripts' => array (							//	Scripts should use a different username and password, so as to limit what the DB will allow them to do.
 				'user' => 'idlx-scripts',					//	So, we set a separate username here...
 				'pass' => 'idlx-scripts-password',			//	...and a separate password here.
 			),												//	
 			'userinfo' => array (							//	These are the default names for the various IDLX-defined tables and their fields.  These are set in case a Project needs to override them.
 				'tablename' => 'UserInfo',					//	
-				'userid' => 'UserID',						//	The UserInfo table only mandates the presence of a UserID field.  Each Auth_ module is responsible for defining other fields for authentication.
+				'userid' => 'UserID',						//	The UserInfo table only mandates the presence of these three fields.  Each Auth_ module is responsible for defining other fields it may need.
+				'login' => 'Login',							//	
+				'password' => 'Password',					//
 			),												//	
 			'interfaces' => array (							//	The heart of the IDLX Framework, and the source of its name.
 				'tablename' => 'Interfaces',				//	
@@ -59,15 +65,17 @@
 				'id' => 'ID',								//	
 				'userid' => 'UserID',						//	
 				'groupid' => 'GroupID',						//	
-			),												//	--------------------------------------------------------------------------------------------------------------
-		),
-		'output' => 'http://www.w3c.org/1999/xhtml/',		//	The output type; this case defines XHTML+CSS+JS.  Only one value can be set for a given project.
-															//	To support multiple methods depending on UI platform, use a dynamically-set value in place of a hard-coded one.
-		'auth' => array (
+			),												//	
+		),													//	--------------------------------------------------------------------------------------------------------------
+		'output' => array (									//	The output types; this case defines XHTML+CSS+JS.  All namespace URIs defined here will be passed to the browser unparsed.
+			'http://www.w3c.org/1999/xhtml/',				//	To support different valid output namespaces depending on UI platform, use dynamically-set values in place of hard-coded ones.
+		),													//	
+		'auth' => array (									//	
 			'engine' => array (								//	auth-engine supports a fallback mechanism:
-				0 => 'CLO',									//	auth-engine-0 is the default auth mechanism,
-				1 => 'Pass',								//	auth-engine-1 is the first fallback mech if auth-engine-0 fails,
-			),												//	and auth-engine-2 would be the second fallback, etc.
+				0 => 'NTLM',								//	auth-engine-0 is the default auth mechanism,
+				1 => 'CLO',									//	auth-engine-1 is the first fallback mech if auth-engine-0 fails,
+				2 => 'Pass',								//	and auth-engine-2 is the second fallback, etc.
+			),												
 		),
 	);
 

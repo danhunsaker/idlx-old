@@ -46,7 +46,12 @@
 			if (count($creds) == 0) return false;
 			$where = '1 = 1';
 			foreach ($creds as $key=>$val) {
-				$where .= " AND `{$key}` = \"{$val}\"";
+				if ($key != $config['db-userinfo-password']) {
+					$where .= " AND `{$key}` = \"{$val}\"";
+				}
+				else {
+					$where .= " AND `{$key}` = AES_ENCRYPT(\"{$val}\", \"{$config['db-encryption-password']}\")";
+				}
 			}
 			$got_results = $this->raw_sql("select `{$config['db-userinfo-userid']}` from `{$config['db-userinfo-tablename']}` where {$where}");
 			if (!$got_results) return false;

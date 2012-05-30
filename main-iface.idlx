@@ -3,35 +3,37 @@
 		<h:title>IDLX Main Interface</h:title>
 	</h:head>
 	<h:body>
-		<iface>
-			Hello, World!
-			<script lang="php">
-				<![CDATA[
-				echo 'Let\'s run a few tests!'."\n";
-				$api->db()->raw_sql("show tables");
-				echo '['.$api->db()->get_result_value(0, 0).']'."\n";
-				if (isset($api->_request['logout'])) {
-					echo '<logout />';
-				}
-				else {
-					echo '<a href="?logout=" xmlns="http://www.w3c.org/1999/xhtml/">Log Out</a>';
-				}
-				]]>
-			</script>
-			<report>
-				<input>
-					<format>RDL</format>
-					<description>test-report.rdl</description>
-				</input>
-				<output>
-					<format>PDF</format>
-					<return>separate</return>
-					<name>test-report.pdf</name>
-				</output>
-			</report>
-			<table>UserInfo</table>
-			<record>UserID="1"</record>
-			<field alt="--Username Not Found--">Login</field>
-		</iface>
+		<h:p>Hello, World!</h:p>
+		<script lang="php">
+			<![CDATA[
+			echo '<div xmlns="http://www.w3c.org/1999/xhtml/">'."\n";
+			echo '<p>Let\'s run a few tests!</p>'."\n";
+			$api->db()->raw_sql("show tables");
+			echo '<p>['.$api->db()->get_result_value(0, 0).']</p>'."\n";
+			if (isset($api->_request['logout'])) {
+				echo '<logout />';
+			}
+			else {
+				echo '<a href="?logout=">Log Out</a>'."\n";
+			}
+			echo '</div>'."\n";
+			]]>
+		</script>
+		<report>
+			<input>
+				<format>RDL</format>
+				<description>test-report.rdl</description>
+			</input>
+			<output>
+				<format>PDF</format>
+				<return>separate</return>
+				<name>test-report.pdf</name>
+			</output>
+		</report>
+		<h:p>
+		<table>UserInfo</table>
+		<record>UserID="1"</record>
+		<field alt="--Username Not Found--">Login</field>
+		</h:p>
 	</h:body>
 </h:html>
