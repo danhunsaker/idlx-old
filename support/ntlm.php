@@ -155,7 +155,8 @@ function ntlm_verify_hash($challenge, $user, $domain, $workstation, $clientblobh
 	print bin2hex($md4hash )."<br>";
 	print bin2hex($ntlmv2hash)."<br>";
 	print bin2hex($blobhash)."<br>"; die; */
-
+	
+//	error_log ("support/ntlm.php ntlm_verify_hash || Returning result of hash comparison [{$user}-@-{$domain} || ".bin2hex($blobhash)." || ".bin2hex($clientblobhash)."]");
 	return ($blobhash == $clientblobhash);
 }
 
@@ -187,8 +188,8 @@ function ntlm_prompt($targetname, $domain, $computer, $dnsdomain, $dnscomputer, 
 		$auth_header = isset($headers['Authorization']) ? $headers['Authorization'] : null;
 	}
 	
-	if (isset($_SESSION['_ntlm_auth']))
-		return $_SESSION['_ntlm_auth'];
+//	if (isset($_SESSION['_ntlm_auth']))
+//		return $_SESSION['_ntlm_auth'];
 	
 	// post data retention, looks like not needed	
 	/*if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -221,22 +222,22 @@ function ntlm_prompt($targetname, $domain, $computer, $dnsdomain, $dnscomputer, 
 			exit;
 		}
 		else if ($msg[8] == "\x03") {
-//			error_log("ntlm.php ntlm_prompt || Calling message parser.");
+			error_log("ntlm.php ntlm_prompt || Calling message parser.");
 			$auth = ntlm_parse_response_msg($msg, $_SESSION['_ntlm_server_challenge'], $get_ntlm_user_hash_callback, $ntlm_verify_hash_callback);
 			unset($_SESSION['_ntlm_server_challenge']);
 			
 //			error_log("ntlm.php ntlm_prompt || Checking authentication status.");
-/*			if (!$auth['authenticated']) {
+			if (!$auth['authenticated']) {		//	Probably used NTLMv1...  We support v2 here...
 				header('HTTP/1.1 401 Unauthorized');
 				header('WWW-Authenticate: NTLM');
 				//unset($_SESSION['_ntlm_post_data']);
 				print $failmsg;
 				exit;
 			}
-			else {
-*/				$_SESSION['_ntlm_auth'] = $auth;
-//			}
-
+/*			else {
+				$_SESSION['_ntlm_auth'] = $auth;
+			}
+*/
 			// post data retention looks like not needed
 			/*if (isset($_SESSION['_ntlm_post_data'])) {
 				foreach ($_SESSION['_ntlm_post_data'] as $k => $v) {
@@ -252,7 +253,7 @@ function ntlm_prompt($targetname, $domain, $computer, $dnsdomain, $dnscomputer, 
 		}
 	}
 	else {
-//		error_log("ntlm.php ntlm_prompt || Non-NTLM header!");
+		error_log("ntlm.php ntlm_prompt || Non-NTLM header!");
 		return array('authenticated' => false);
 	}
 }

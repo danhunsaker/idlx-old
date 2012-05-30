@@ -11,12 +11,13 @@
 		}
 		
 		private function getAPICode() {
-			global $config, $auth_file, $auth_class, $proj_dir;
+			global $config, $auth_file, $auth_class, $siteroot, $idlxroot;
 			
 			//	The $api_code segment defines the API class, and creates $api as an instance.
 			$api_code = '
 	define("IN_SITE", true);	//	Protection from redirect in include()d files...
-	define("IDLX_NS_URI", "'.IDLX_NS_URI.'");
+	
+	$_SESSION[\'user_id\'] = "'.$_SESSION['user_id'].'";
 	
 	class IDLXS_API {
 		private $db_obj = null;
@@ -25,7 +26,8 @@
 				$api_code .= "'{$key}' => '{$req}', ";
 			}
 			$api_code .= ');
-		public $project_path = "'.$proj_dir.'";
+		public $project_path = "'.$siteroot.'";
+		public $idlx_path = "'.$idlxroot.'";
 		
 		public function set_db(DBModule $db) {
 			$this->db_obj = $db;
@@ -36,6 +38,8 @@
 		}
 	}
 	
+	include_once("'.strtr(realpath(dirname(__FILE__) . '/../../'), array('\\'=>'/')).'/config.php");
+
 	$api = new IDLXS_API();'."\n";
 			
 			//	The $db_code segment brings in the DBModule interface, then the class for the DBModule in use.

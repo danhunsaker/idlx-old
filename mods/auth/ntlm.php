@@ -36,7 +36,7 @@
 				}
 				
 				if ($authed) {
-					$db_module->get_user(array($config['db-userinfo-login'] => $this->user, $config['db-userinfo-password'] => $this->pass));
+					return $db_module->get_user(array($config['db-userinfo-login'] => $this->user, $config['db-userinfo-password'] => $this->pass));
 				}
 				else {
 					error_log("Auth_NTLM::auth || LDAP auth verification failed!");
@@ -62,6 +62,8 @@
 			unset($_SESSION['user_id']);
 			header('HTTP/1.1 401 Unauthorized');
 			echo '<span style="font-size: 3em;">Successfully Logged Out</span>';
+			session_unset();
+			session_destroy();
 			return true;
 		}
 		
@@ -103,6 +105,8 @@
 		}
 		$pass = $db->get_result_value($config['db-userinfo-password'], 0);		//	Because storing unencrypted passwords in the database is inherently dangerous, $pass is equivalent to the A1 section of a Digest Auth response.
 		$auth->store_details($user, $pass);
+
+//		error_log("Auth_NTLM  ntlm_auth_user_hash || Generating NTLM password hash [{$pass}]");
 		
 		return ntlm_md4(ntlm_utf8_to_utf16le($pass));
 	}

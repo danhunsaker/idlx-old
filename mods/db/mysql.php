@@ -24,7 +24,7 @@
 		public function raw_sql ($sql_query) {
 //			error_log ("DB_MySQL::raw_sql || Running raw SQL query [{$sql_query}].");
 			try {
-				do $this->results->fetchAll(); while ($this->results->nextRowSet());		//	Navigate through any unused results so the connection is available again.
+				if (is_a($this->results, 'PDOStatment')) { do $this->results->fetchAll(); while ($this->results->nextRowSet()); }		//	Navigate through any unused results so the connection is available again.
 				$this->results = $this->con->query($sql_query);
 				if ($this->results === false) return false;
 			}
@@ -54,6 +54,7 @@
 					$where .= " AND `{$key}` = AES_ENCRYPT(\"{$val}\", \"{$config['db-encryption-password']}\")";
 				}
 			}
+//			error_log ("DB_MySQL::get_user || Pulling user from DB [{$where}]");
 			$got_results = $this->raw_sql("select `{$config['db-userinfo-userid']}` from `{$config['db-userinfo-tablename']}` where {$where}");
 			if (!$got_results) return false;
 			return $this->get_result_value($config['db-userinfo-userid'], 0);
@@ -115,6 +116,9 @@
 			if ($perm_found) {
 				$obj_perm = $this->get_result_value($config['db-permissions-id'], 0);
 			}
+			else {
+				$obj_perm = '';
+			}
 			
 			//	Now, iteratively compile a list of all parent Perms.
 			if (isset($obj_perm) && !empty($obj_perm)) {
@@ -142,6 +146,7 @@
 			}
 
 			//	Pull up the ACLs for all the Perms we found which apply to the user and all the groups they belong to.
+			if (!isset($pperms) || !is_array($pperms)) $pperms = array();
 			array_unshift($pperms, $obj_perm);
 			$uacls = array();
 			$gacls = array();
@@ -174,7 +179,7 @@
 		}
 		
 		public function acl_table ($name) {
-			return $this->acl_check('table', $cname);
+			return $this->acl_check('table', $name);
 		}
 		
 		public function acl_field ($table, $field) {

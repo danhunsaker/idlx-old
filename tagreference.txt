@@ -57,4 +57,4 @@ IDLX Tag Reference:
 										current user.  Only one of these has any effect, but there 
 										is no upper limit on the number that can be in an Interface.
 <idlx:interface>					-	Pulls in another Interface, by CodeName.  Use a script to 
-										bring in an Interface in a file (for now?).
+										bring in an Interface from a file (for now?).

@@ -23,12 +23,13 @@
 		$auth_engine = $config['auth-engine-'.$mod_i];
 		include_once('mods/auth/'.mb_strtolower($auth_engine).'.php');
 		$auth_class = 'Auth_'.$auth_engine;
-//		error_log ("load-modules.php || Trying to auth with {$auth_class} [{$mod_i}]");
 		$auth = new $auth_class();
 		
 		$uid = $auth->auth($db);
-		if ($uid !== false)
+		if ($uid !== false) {
+			error_log ("load-modules.php || Successful auth with {$auth_class} [{$mod_i}]");
 			break;
+		}
 	}
 	
 	if ($uid === false) {

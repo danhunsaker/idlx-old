@@ -74,7 +74,7 @@
 				$siteroot = strtr(dirname($_SERVER['SCRIPT_FILENAME']), array('\\' => '/', $_SERVER['DOCUMENT_ROOT'] => ''));
 			}
 			if (!in_array(substr($message, -1), array('.', '!', '?'))) $message .= '.';
-			error_log ("{$caller} || {$message}  Redirecting to project root [{$siteroot}].  Doc requested [{$_SERVER['REQUEST_URI']}{$_SERVER['PATH_INFO']}?{$_SERVER['QUERY_STRING']}]");
+			@error_log ("{$caller} || {$message}  Redirecting to project root [{$siteroot}].  Doc requested [{$_SERVER['REQUEST_URI']}{$_SERVER['PATH_INFO']}?{$_SERVER['QUERY_STRING']}]");
 			header('Location: '.$siteroot.'/');
 			ob_end_clean();
 			die();
@@ -83,12 +83,14 @@
 	
 	if (!function_exists('clean_whitespace_from_nodes')) {
 		function clean_whitespace_from_nodes (DOMNode $dom) {
-			if (empty($dom->childNodes) || $dom->childNodes->length == 0) {
-				$dom->nodeValue = trim($dom->nodeValue);
+			if (!$dom->hasChildNodes()) {
+				$dom->nodeValue = preg_replace(array('/^(\s)\s+/', "/(\s)\s+$/"), array('$1', '$1'), $dom->nodeValue);
 				return $dom;
 			}
 			foreach ($dom->childNodes as $node) {
 				$node = clean_whitespace_from_nodes ($node);
+				if ($node->nodeType == XML_TEXT_NODE && $node->isWhitespaceInElementContent())
+					$dom->removeChild($node);
 			}
 			return $dom;
 		}
@@ -99,13 +101,44 @@
 			$dom = new DOMDocument();
 			$foot_node = $dom->createElementNS('http://www.w3c.org/1999/xhtml/', 'div');
 			$foot_node->setAttribute('class', 'footer');
-			$copy_node = $dom->createElementNS('http://www.w3c.org/1999/xhtml/', 'span', '&copy; 2011'.(date('Y') > 2011 ? '-'.date('Y') : '').' by&nbsp;');
+			$copy_node = $dom->createElementNS('http://www.w3c.org/1999/xhtml/', 'span', '&copy; 2011'.(date('Y') > 2011 ? '-'.date('Y') : '').' by ');
 			$copy_node->setAttribute('id', 'copy');
 			$team_node = $dom->createElementNS('http://www.w3c.org/1999/xhtml/', 'a', 'The IDLX Team');
 			$team_node->setAttribute('href', 'http://idlx.sourceforge.net/');
+			$copy_node_2 = $dom->createTextNode('.  Released under the GPL.');
 			$copy_node->appendChild($team_node);
+			$copy_node->appendChild($copy_node_2);
 			$foot_node->appendChild($copy_node);
 			return $foot_node;
+		}
+	}
+	
+	if (!function_exists('tidy_config')) {
+		function tidy_config() {
+			global $config;
+			$ret = array (
+				'input-xml' => true,
+				'output-xml' => true,
+				'output-xhtml' => false,
+				'add-xml-space' => true,
+				'clean' => true,
+//				'hide-comments' => true,
+				'lower-literals' => true,
+				'preserve-entities' => true,
+				'indent' => true,
+				'indent-attributes' => false,
+				'indent-spaces' => 4,
+				'markup' => true,
+				'wrap' => 0,
+				'wrap-attributes' => false,
+				'newline' => 'LF',
+				'force-output' => true,
+			);
+			if (in_array('http://www.w3c.org/1999/xhtml/', $config['output'])) {
+				$ret['output-xhtml'] = true;
+				$ret['output-xml'] = false;
+			}
+			return $ret;
 		}
 	}
 	

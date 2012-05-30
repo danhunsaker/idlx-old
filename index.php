@@ -9,11 +9,14 @@
 	session_start();
 
 	if (!defined('IN_SITE')) define('IN_SITE', true);
+
 	$proj_dir = strtr(getcwd(), array('\\'=>'/'));
 	if (substr($proj_dir, -1, 1) != '/') $proj_dir .= '/';
 	chdir(dirname(__FILE__));
 	
 	//	Can't use __FILE__ to determine $siteroot because of the way Projects are implemented...
+	$idlxroot = strtr(dirname(__FILE__), '\\', '/');
+	$idlxroot = strtr($idlxroot, array($_SERVER['DOCUMENT_ROOT'] => ''));
 	$siteroot = strtr(dirname($_SERVER['SCRIPT_FILENAME']), array('\\' => '/', $_SERVER['DOCUMENT_ROOT'] => ''));
 
 	include_once('util-functions.php');
@@ -33,7 +36,7 @@
 	}
 	$if_dom = new DOMDocument();
 	$if_dom->formatOutput = true;
-	$if_dom->preserveWhiteSpace = false;
+//	$if_dom->preserveWhiteSpace = false;
 	$if_dom->loadXML($main_iface);
 	$footer = $if_dom->importNode(get_footer(), true);
 	$if_dom->documentElement->appendChild($footer);
@@ -42,9 +45,9 @@
 	$nothingNew = false;
 	while ($nothingNew == false) {
 		$if_dom->formatOutput = true;
-		$if_dom->preserveWhiteSpace = false;
+//		$if_dom->preserveWhiteSpace = false;
 		$if_dom->normalizeDocument();
-		error_log("index.php || Begin processing pass [{$if_dom->saveXML()}]");
+//		error_log("index.php || Begin processing pass [{$if_dom->saveXML()}]");
 		$nothingNew = true;
 		
 		$iface_nodes  = $xp->evaluate('//idlx:interface');	//	Pull in any requested external Interfaces.
@@ -56,11 +59,11 @@
 //				error_log("index.php || Interface name [{$iface_name}]");
 				$iface_contents = $db->get_iface_cname($iface_name);
 				if ($iface_contents !== false) {
-//					error_log("index.php || Importing external Interface [{$iface_name}]");
-					$import_dom = new DOMDocument();
-					$import_dom->loadXML($iface_contents);
-					$new_node = $node->ownerDocument->importNode($import_dom->documentElement);
-					$node->parentNode->replaceChild($new_node, $node);
+//					error_log("index.php || Importing external Interface [{$iface_name} || {$iface_contents}]");
+					$import_dom = $node->ownerDocument->createDocumentFragment();
+					$import_dom->appendXML($iface_contents);
+//					$new_node = $node->ownerDocument->importNode($import_dom->documentElement);
+					$node->parentNode->replaceChild($import_dom, $node);
 				}
 				else {
 					error_log("index.php || Interface [{$iface_name}] not found; ignoring");
@@ -264,18 +267,19 @@
 		}
 	}
 	
-	error_log("index.php || Processing complete; commencing cleanup of IDLX artifacts [{$if_dom->saveXML()}]");
+	session_commit();
+	
 	if (isset($xuid_mods[IDLX_NS_URI])) {
 		$if_dom = $xuid_mods[IDLX_NS_URI]->translate($if_dom);
 	}
-	error_log("index.php || Cleanup complete [{$if_dom->saveXML()}]");
 	
-	@$if_dom->loadXML($if_dom->saveXML());
-	$if_dom->formatOutput = true;
-	$if_dom->preserveWhiteSpace = false;
+	$temp_dom = '';
+	foreach ($if_dom->childNodes as $node)
+		$temp_dom .= $if_dom->saveXML($node);
 	
-	$if_dom = clean_whitespace_from_nodes($if_dom);
-	echo $if_dom->saveXML();
+	$tidy = new tidy;
+	echo $tidy->repairString($temp_dom, tidy_config(), 'UTF8');
+	
 	
 	//	That's all she wrote, folks.  Clean up and go home.
 //	header('Content-type: text/xhtml;');	//	Remove this when development is complete!

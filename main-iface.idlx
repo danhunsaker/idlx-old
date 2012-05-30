@@ -1,24 +1,55 @@
 <html xmlns:idlx="http://idlx.sourceforge.net/schema/" xmlns="http://www.w3c.org/1999/xhtml/">
 	<head>
 		<title>IDLX Main Interface</title>
+		<idlx:script lang="php">
+			<![CDATA[
+			echo '<link rel="stylesheet" href="'.$api->idlx_path.'/style.css" />';
+			echo '<!--[if IE]><link rel="stylesheet" href="'.$api->idlx_path.'/ie-style.css" /><![endif]-->';
+			]]>
+		</idlx:script>
 	</head>
 	<body>
 		<div class="nav">
-			<ul>
-				<li><idlx:script lang="php">
-					<![CDATA[
-					if (isset($api->_request['logout'])) {
-						echo '<logout xmlns="'.IDLX_NS_URI.'" />';
+			<idlx:script lang="php">
+				<![CDATA[
+				$at_home = true;
+				$navtags = '';
+				for ($i = 0; $cname = $api->db()->get_data_value('Interfaces', '`CodeName` LIKE "%-nav" LIMIT '.$i.',1', 'CodeName'); $i++) {
+					$dispname = $api->db()->get_data_value('Interfaces', '`CodeName` LIKE "%-nav" LIMIT '.$i.',1', 'InterfaceName');
+					if (isset($api->_request['p']) && $api->_request['p'] == $cname) {
+						$seltext = ' id="selected"';
+						$at_home = false;
 					}
 					else {
-						echo '<a href="?logout=" xmlns="http://www.w3c.org/1999/xhtml/">Log Out</a>';
+						$seltext = '';
 					}
-					]]>
-				</idlx:script></li>
-				<li>
-					<a href=""></a>
-				</li>
-			</ul>
+					$navtags .= "<li><a href=\"?p={$cname}\"{$seltext}>{$dispname}</a></li>";
+				}
+				$navtags .= "<li><a href=\"?logout\">Log Out</a></li>";
+				$navtags = "<li><a href=\"{$api->project_path}/\"".($at_home ? ' id="selected"' : '').">Home</a></li>" . $navtags;
+				echo '<ul xmlns="http://www.w3c.org/1999/xhtml/">'.$navtags.'</ul>';
+				]]>
+			</idlx:script>
+		</div>
+		<div class="content">
+			<idlx:script lang="php">
+				<![CDATA[
+				if (isset($api->_request['logout'])) {
+					echo '<logout xmlns="'.IDLX_NS_URI.'" />';
+				}
+				
+				if (isset($api->_request['p']) && !empty($api->_request['p'])) {
+					if (!is_numeric($api->_request['p'])) {
+						echo '<interface xmlns="'.IDLX_NS_URI.'">'.$api->_request['p'].'</interface>';
+					} else {
+						echo '<interface xmlns="'.IDLX_NS_URI.'">iface-'.$api->_request['p'].'</interface>';
+					}
+				}
+				else {
+					echo '<interface xmlns="'.IDLX_NS_URI.'">home</interface>';
+				}
+				]]>
+			</idlx:script>
 		</div>
 	</body>
 </html>

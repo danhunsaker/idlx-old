@@ -53,6 +53,21 @@
 				$node->replaceChild($out_root, $node->documentElement);
 			}
 			
+			$out_ofplace = $xp->evaluate("//xhtml:html/*[namespace-uri()='".self::out_ns."' and name()!='head' and name()!='body']");
+			if ($out_ofplace->length > 0) {				//	Do we have XHTML tags that are in the wrong spot?  Let's move them inside the body tag.
+				$body_tag = $xp->evaluate("//xhtml:html/xhtml:body");
+				if ($body_tag->length != 1) {
+					error_log ("XUID_IDLX_XHTML::translate || Cannot find body tag or too many body tags [{$body_tag->length}].  Cannot resolve out-of-place tags.");
+				}
+				else {
+					$body_node = $body_tag->item(0);
+					foreach ($out_ofplace as $oop_node) {
+						$oop_node->parentNode->removeChild($oop_node);
+						$body_node->appendChild($oop_node);
+					}
+				}
+			}
+			
 			//	Now clean up the document so the default namespace is correct.
 			$prefix = $node->lookupPrefix(self::out_ns);
 			$node->documentElement->removeAttributeNS(self::out_ns, $prefix);
