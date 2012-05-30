@@ -1,0 +1,190 @@
+<h:h2 xmlns:h="http://www.w3c.org/1999/xhtml/">Interface Editor</h:h2>
+<h:p xmlns:h="http://www.w3c.org/1999/xhtml/">
+	The IDLX Framework Interface Editor is the primary Interface for manipulating IDLX Interfaces.  
+	This first edition only allows for directly editing the source XML, but authoring the content in 
+	another editor and then copying the resulting code here is probably the most flexible approach 
+	anyhow.
+</h:p>
+<h:form xmlns:h="http://www.w3c.org/1999/xhtml/" action="#" method="post" onsubmit="return save_iface()">
+	<h:label>Interface Name:</h:label>
+	<h:select name="iface_select" onchange="change_iface()">
+		<idlx:script lang="php" xmlns:idlx="http://idlx.sourceforge.net/schema/2011/08/">
+			<![CDATA[
+				$api->db()->raw_sql('select count(`ID`) from `Interfaces`');
+				$count = $api->db()->get_result_value(0, 0);
+				for ($i = 1; $i <= $count; $i++) {
+					$value   = $api->db()->get_data_value('Interfaces', 'ID="'.$i.'"', 'CodeName');
+					$display = $api->db()->get_data_value('Interfaces', 'ID="'.$i.'"', 'InterfaceName');
+					echo "<h:option value=\"{$value}\" xmlns:h=\"http://www.w3c.org/1999/xhtml/\">{$display}</h:option>";
+				}
+			]]>
+		</idlx:script>
+		<h:option value="new">Create Interface</h:option>
+	</h:select>
+	<h:label>Interface Code:</h:label>
+	<h:textarea name="iface_code" onchange="codeChanged = true">
+	</h:textarea>
+	<h:label>AJAX Responder:</h:label>
+	<h:textarea name="iface_ajax" onchange="ajaxChanged = true">
+	</h:textarea>
+	<h:input type="submit" name="save" value="Save Changes" />
+	<h:input type="button" name="revert" value="Revert Changes" onclick="revert_iface()" />
+</h:form>
+<h:script type="text/javascript" xmlns:h="http://www.w3c.org/1999/xhtml/">
+	<![CDATA[
+	if (window.XMLHttpRequest) {
+		xmlhttp = new XMLHttpRequest();
+	}
+	else {
+		xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+	}
+	
+	ajaxChanged = false;
+	codeChanged = false;
+	codeCName = document.forms[0].elements[0].options.item(document.forms[0].elements[0].selectedIndex).value;
+	
+	function XHR_callback () {
+//		alert("called back");
+		var status_box = document.getElementById("ajax-status");
+		
+//		alert("Checking readiness state");
+		if (xmlhttp.readyState == 0) {
+			status_box.innerHTML = "Connecting to server...";
+		}
+		else if (xmlhttp.readyState == 1) {
+			status_box.innerHTML = "Sending data...";
+		}
+		else if (xmlhttp.readyState == 2) {
+			status_box.innerHTML = "Data sent...";
+		}
+		else if (xmlhttp.readyState == 3) {
+			status_box.innerHTML = "Waiting for reply...";
+		}
+		else {	//	xmlhttp.readyState == 4
+			status_box.innerHTML = "Response ready...";
+			if (xmlhttp.status == 200) {
+				var dom = xmlhttp.responseXML;
+				status_box.innerHTML = "DOM created.";
+				document.forms[0].elements[1].value = dom.getElementsByTagName("code")[0].textContent;
+				document.forms[0].elements[2].value = dom.getElementsByTagName("ajax")[0].textContent;
+				document.forms[0].elements[1].readOnly = false;
+				document.forms[0].elements[2].readOnly = false;
+				codeChanged = false;
+				status_box.innerHTML = "";
+			}
+			else {
+				status_box.innerHTML = "Error. "+xmlhttp.status;
+			}
+		}
+		
+	}
+	
+	function change_iface() {
+		//	get iface name (cname) from SELECT field...
+		var cname = document.forms[0].elements[0].options.item(document.forms[0].elements[0].selectedIndex).value;
+//		alert ("Change iFace Called || cName ["+cname+"]");
+		
+		if (cname == codeCName) {
+//			alert ("cName and codeCName are the same");
+			return;
+		}
+		else if (codeChanged || ajaxChanged) {
+			//	Ask user if they want to save...
+//			alert ("code or ajax changed");
+			if (confirm("Press OK to save this Interface before loading a different one.\n\nPress cancel to discard your changes.")) {
+				save_iface();
+			}
+		}
+		
+//		alert ("Changing to iFace ["+cname+"]");
+		if (cname == "new") {
+			//	Get new Interface iName and cName...
+//			alert ("Create iFace option selected");
+			var new_cname = prompt("Enter a Code Name for the new Interface.", "");
+			var new_iname = prompt("Enter a Visible Name for the new Interface.", new_cname);
+			create_iface(new_cname, new_iname);
+		} 
+		else {
+			codeCName = cname;
+			document.forms[0].elements[1].readOnly = true;
+			document.forms[0].elements[2].readOnly = true;
+			
+//			alert ("Setting up XHR");
+			xmlhttp.onReadyStateChange = XHR_callback;
+//			alert ("XHR callback set");
+			xmlhttp.open("GET", "ajax.php?p=iface-admin&cname="+encodeURIComponent(cname), true);
+//			alert ("XHR open");
+			xmlhttp.send();
+//			alert ("Sent XHR");
+		}
+	}
+	
+	function save_iface() {
+		//	get iface name (cname) from SELECT field...
+		document.forms[0].elements[1].readOnly = true;
+		document.forms[0].elements[2].readOnly = true;
+		
+		xmlhttp.onreadystatechange = function() {
+			if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+				document.forms[0].elements[1].readOnly = false;
+				document.forms[0].elements[2].readOnly = false;
+				codeChanged = false;
+			}
+		}
+		xmlhttp.open("POST", "ajax.php?p=iface-admin&savename="+encodeURIComponent(document.forms[0].elements[0].options.item(document.forms[0].elements[0].selectedIndex).value), true);
+		xmlhttp.setRequestHeader("Content-type", "multipart/form-data; boundary=AaB03x");
+		var data = "--AaB03x\r\nContent-disposition: form-data; name=\"iface_code\"\r\nContent-type: text/xml\r\n\r\n";
+		data = data + document.forms[0].elements[1].value;
+		data = data + "\r\n--AaB03x\r\nContent-disposition: form-data; name=\"iface_ajax\"\r\nContent-type: text/plain\r\n\r\n";
+		data = data + document.forms[0].elements[2].value;
+		data = data + "\r\n--AaB03x--";
+		xmlhttp.send(data);
+		return false;
+	}
+	
+	function revert_iface() {
+		document.forms[0].elements[1].readOnly = true;
+		document.forms[0].elements[2].readOnly = true;
+		
+		xmlhttp.onreadystatechange = XHR_callback;
+		xmlhttp.open("GET", "ajax.php?p=iface-admin&cname="+encodeURIComponent(codeCName), true);
+		xmlhttp.send();
+	}
+	
+	function create_iface(cname, iname) {
+		document.forms[0].elements[1].readOnly = true;
+		document.forms[0].elements[2].readOnly = true;
+		new_iface = new Option;
+		new_iface.value = cname;
+		new_iface.text = iname;
+		create_iface = document.forms[0].elements[0].options[document.forms[0].elements[0].options.length - 1];
+		
+		xmlhttp.onreadystatechange = function() {
+			if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+				//	Change selected option to new one...
+				document.forms[0].elements[0].options[document.forms[0].elements[0].options.length - 1] = new_iface;
+				document.forms[0].elements[0].options[document.forms[0].elements[0].options.length] = create_iface;
+				codeCName = new_iface.value;
+				
+				for (option in document.forms[0].elements[0].options) {
+					if (option.value == codeCName) {
+						document.forms[0].elements[0].selectedIndex = option.index;
+						break;
+					}
+				}
+				document.forms[0].elements[1].value = '';
+				document.forms[0].elements[1].readOnly = false;
+				document.forms[0].elements[2].value = '';
+				document.forms[0].elements[2].readOnly = false;
+			} else if (xmlhttp.readyState == 4) {
+				alert ("Interface creation failed.\n\n"+xmlhttp.responseText);
+			}
+		}
+		xmlhttp.open("GET", "ajax.php?p=iface-admin&cname="+encodeURIComponent(cname)+"&iname="+encodeURIComponent(iname), true);
+		xmlhttp.send();
+	}
+	
+	document.getElementsByTagName("body")[0].onload = revert_iface;
+	
+	]]>
+</h:script>

@@ -37,11 +37,6 @@ IDLX Tag Reference:
 										Of course, any module can define its own values, though it 
 										must register them with the core.
 		<idlx:name>					-	Provides a filename hint for the final report, when valid.
-<idlx:asis>							-	Identifies a block of text that should not be interpreted
-										as IDLX code.  These blocks must always be CDATA to avoid 
-										confusing the XML parser.  This allows passing raw XML and 
-										text all the way through to the UI platform.  The asis tag 
-										and CDATA delimiters will be stripped from the output.
 <idlx:table>						-	Identifies a table to pull data from.  This table is used 
 										until another table tag is encountered.
 <idlx:record>						-	Identifies a record to pull data from.  This record is used 

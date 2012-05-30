@@ -62,15 +62,22 @@
 				else {
 					$body_node = $body_tag->item(0);
 					foreach ($out_ofplace as $oop_node) {
+						error_log ("XUID_IDLX_XHTML::translate || Moving out-of-place node into the body node [{$oop_node->nodeName}]");
 						$oop_node->parentNode->removeChild($oop_node);
 						$body_node->appendChild($oop_node);
 					}
 				}
 			}
 			
+			@$node->loadXML($node->saveXML());
+			
 			//	Now clean up the document so the default namespace is correct.
 			$prefix = $node->lookupPrefix(self::out_ns);
 			$node->documentElement->removeAttributeNS(self::out_ns, $prefix);
+			foreach ($xp->evaluate("//*") as $desc_node) {
+				$prefix = $desc_node->lookupPrefix(self::out_ns);
+				$desc_node->removeAttributeNS(self::out_ns, $prefix);
+			}
 
 			//	And remove the IDLX namespace, if it's still hanging around.
 			$prefix = $node->lookupPrefix(IDLX_NS_URI);

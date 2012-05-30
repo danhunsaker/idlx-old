@@ -15,8 +15,8 @@
 				$this->results = new PDOStatement();
 			}
 			catch (PDOException $e) {
-				error_log('DB_MySQL::__construct || Connection Failed! [' . $e->getMessage() . ']');
-				die ('Connection Failed! [' . $e->getMessage() . ']');
+				error_log("DB_MySQL::__construct || Connection Failed! [{$e->getMessage()} || {$server} || {$user} || {$pass} || {$database}]");
+				die ("Connection Failed! [{$e->getMessage()}]");
 				return false;
 			}
 		}
@@ -26,7 +26,11 @@
 			try {
 				if (is_a($this->results, 'PDOStatment')) { do $this->results->fetchAll(); while ($this->results->nextRowSet()); }		//	Navigate through any unused results so the connection is available again.
 				$this->results = $this->con->query($sql_query);
-				if ($this->results === false) return false;
+				if ($this->results === false) {
+					$error_info = $this->con->errorInfo();
+					error_log ("DB_MySQL::raw_sql || Query failure: {$sql_query} [{$error_info[0]} || {$error_info[1]} || {$error_info[2]}]");
+					return false;
+				}
 			}
 			catch (PDOException $e) {
 				error_log ("DB_MySQL::raw_sql || Query failure: {$sql_query} [{$e->getMessage()}]");
@@ -102,7 +106,7 @@
 					}
 					break;
 				case 'table':
-					$obj = "`{$config['db-permissions-tblname']}`=\"{$name['table']}\"";
+					$obj = "`{$config['db-permissions-tblname']}`=\"{$name}\"";
 					break;
 				case 'field':
 					$obj = "`{$config['db-permissions-tblname']}`=\"{$name['table']}\" and `{$config['db-permissions-fieldname']}`=\"{$name['field']}\"";
@@ -188,6 +192,7 @@
 		
 		public function get_data_value ($table, $record, $field, $alt = false) {
 			if ((($this->acl_field($table, $field) & 1) == 0) || (($this->acl_table($table) & 1) == 0)) return $alt;		//	Check for read rights.
+//			error_log ("DB_MySQL::get_data_value || User has read permissions for this field and table [{$table} || {$field} || {$record}]");
 			$result = $this->raw_sql("select `{$field}` from `{$table}` where {$record}");
 			if ($result === false) return $alt;
 			return $this->get_result_value($field, 0);

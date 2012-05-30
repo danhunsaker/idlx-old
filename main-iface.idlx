@@ -51,5 +51,7 @@
 				]]>
 			</idlx:script>
 		</div>
+		<div id="ajax-status">
+		</div>
 	</body>
 </html>

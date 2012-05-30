@@ -1,6 +1,6 @@
 body {
-	background-color: aliceblue;
-	color: black;
+	background: whitesmoke;
+	color: gray;
 	font-family: sans-serif;
 	width: 100%;
 	margin: 0;
@@ -14,18 +14,19 @@ body div {
 }
 
 a {
-	color: cadetblue;
+	color: black;
 	text-decoration: none;
 	border: none;
 }
 
 a:hover {
-	color: navy;
+	color: gray;
 	text-decoration: underline;
 }
 
 .nav {
 	padding-top: 0;
+	margin-bottom: -4em;
 }
 
 .footer {
@@ -68,14 +69,6 @@ a:hover {
 	vertical-align: top;
 }
 
-.content {
-	margin-top: -4em;
-}
-
-/*.thanks {
-	text-align: center;
-}*/
-
 .thanks a {
 	padding-right: 35px;
 	position: relative;
@@ -89,4 +82,36 @@ a:hover {
 
 h1 + img {
 	float: right;
+}
+
+form {
+	text-align: center;
+}
+
+label, input[type="text"], select, textarea {
+	color: inherit;
+	background: ghostwhite;
+	border: 1px solid silver;
+	display: block;
+	width: 90%;
+	margin: 3px auto;
+}
+
+label {
+	font-weight: bold;
+	text-align: left;
+	background: transparent;
+	border: none;
+}
+
+textarea {
+	height: 20em;
+	font-family: sans-serif;
+}
+
+#ajax-status {
+	margin: 0 auto;
+	padding: 0;
+	height: 1px;
+	max-height: 1em;
 }
