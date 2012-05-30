@@ -10,6 +10,9 @@
 		private $con;
 		
 		public function __construct ($server, $user, $pass, $database) {
+			if (!need_ext('pdo')) return false;
+			if (!need_ext('pdo_mysql')) return false;
+
 			try {
 				$this->con = new PDO('mysql:dbname='.$database.';host='.$server, $user, $pass);
 				$this->results = new PDOStatement();

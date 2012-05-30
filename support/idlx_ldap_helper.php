@@ -35,6 +35,8 @@
 		function __construct () {
 			global $config;
 
+			if (!need_ext('ldap')) return false;
+
 			if (!is_a($this->ldap, 'adLDAP')) {
 				try {
 //					error_log ("Auth_ldap::ldap_auth_user || Attempting to connect to LDAP server [{$config['auth-ldap-account-suffix']} || ".var_export($config['auth-ldap-domain-controllers'], true)."]");

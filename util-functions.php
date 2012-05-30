@@ -98,6 +98,8 @@
 	
 	if (!function_exists('get_footer')) {
 		function get_footer() {
+			if (!need_ext('libxml')) return false;
+
 			//	Create a new DOMDocument.  Things are cleaner this way.
 			$dom = new DOMDocument();
 			
@@ -201,6 +203,10 @@
 	if (!function_exists('process_iface')) {
 		function process_iface($iface) {
 			global $config, $idlxs_mods, $xuid_mods, $db, $rep_proc_mods, $rep_gen_mods, $uid, $auth, $proj_dir, $siteroot, $idlxroot;
+			
+			if (!need_ext('libxml')) return false;
+			if (!need_ext('tidy')) return false;
+			
 			$if_dom = new DOMDocument();
 			$if_dom->formatOutput = true;
 			$if_dom->loadXML($iface);
@@ -494,6 +500,19 @@
 			header ("HTTP/1.1 403 Forbidden");
 			@error_log("util-functions.php die_deny || Ending execution [{$_SERVER['REQUEST_URI']}?{$_SERVER['QUERY_STRING']}{$_SERVER['PATH_INFO']} || {$reason}]");
 			die ($reason);
+		}
+	}
+	
+	if (!function_exists('need_ext')) {
+		function need_ext ($ext_name) {
+			if (!extension_loaded($ext_name)) {
+				$prefix = (PHP_SHLIB_SUFFIX === 'dll') ? 'php_' : '';
+				if (ini_get('enable_dl') != 1) return false;			//	Cannot dynamically load extensions.
+				return dl($prefix . $ext_name . PHP_SHLIB_SUFFIX);		//	Try loading and return success/fail to the caller.
+			}
+			else {
+				return true;											//	Already loaded.  Continue with your day.
+			}
 		}
 	}
 	

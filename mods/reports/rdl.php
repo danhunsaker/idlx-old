@@ -52,6 +52,9 @@
 		
 		public function process($input_file) {					//	Processes the report defined in $input_file.  Returns the XML+XSL-FO version of the finalized report, or false on error.
 			global $proj_dir, $db;
+
+			if (!need_ext('libxml')) return false;
+
 			$rdl_dom = DOMDocument::load($proj_dir.'/reports/'.$input_file);
 			if ($rdl_dom === false) return false;
 			$rdl_xp = new DOMXPath($rdl_dom);

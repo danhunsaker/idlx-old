@@ -1,9 +1,8 @@
 <?php
 	include_once(dirname(__FILE__) . "/../../in-site-check.php");
 	
-	/** mods/define/reports.php
-		Defines the PHP interfaces for the two types of Reports modules.
-		Each module should only implement ONE of these module types.
+	/** mods/reports/pdf.php
+		Implements the ReportGenerator to create a PDF version of a report.
 	*/
 
 	class ReportGen_PDF implements ReportGenerator {
@@ -14,7 +13,7 @@
 		function generate($xml) {		//	Generates the report from the XML+XSL-FO in $xml.  Returns report on success; false on error.
 			if ($xml === false || empty($xml)) return false;	//	Cannot process XSL-FO if there is none to process.
 			
-			$cmd = strtr(getcwd(), '\\', '/').'/support/fop/fop.bat -dpi 300 -fo - -pdf -';
+			$cmd = strtr(getcwd(), '\\', '/').'/support/fop/fop -dpi 300 -fo - -pdf -';
 
 			$descriptorspec = array(
 			   0 => array("pipe", "r"),	// stdin is a pipe that the child will read from
@@ -25,11 +24,6 @@
 			$process = proc_open($cmd, $descriptorspec, $pipes);
 
 			if (is_resource($process)) {
-				// $pipes now looks like this:
-				// 0 => writeable handle connected to child stdin
-				// 1 => readable handle connected to child stdout
-				// Any error output will be appended to /tmp/error-output.txt
-
 				fwrite($pipes[0], $xml);
 				fclose($pipes[0]);
 

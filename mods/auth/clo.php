@@ -11,6 +11,9 @@
 	class Auth_CLO implements AuthModule {
 		public function auth (DBModule $db_module) {
 			global $config;
+
+			if (!need_ext('openssl')) return false;
+
 			if (!isset($_SERVER['SSL_CLIENT_CERT']) || empty($_SERVER['SSL_CLIENT_CERT'])) return false;
 			$cert = openssl_x509_parse ($_SERVER['SSL_CLIENT_CERT']);
 			if (empty($cert['name'])) return false;

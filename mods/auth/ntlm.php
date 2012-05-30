@@ -41,7 +41,7 @@
 					return $db_module->get_user(array($config['db-userinfo-login'] => $this->user, $config['db-userinfo-password'] => $this->pass));
 				}
 				else {
-					error_log("Auth_NTLM::auth || LDAP auth verification failed!");
+					error_log("Auth_NTLM::auth || LDAP auth verification failed!");		//	This line will only be reached if LDAP verification is enabled.
 					$this->user = null;
 					$this->pass = null;
 					return false;
@@ -114,6 +114,8 @@
 	
 	function ntlm_verify_des($challenge, $user, $domain, $workstation, $clientblobhash, $clientblob, $get_ntlm_user_hash) {
 //		error_log ("mods/auth/ntlm.php ntlm_verify_des || Attempting NTLM auth with DES instead of HMAC_MD5");
+
+		if (!need_ext('mcrypt')) return false;
 		
 		$md4hash = $get_ntlm_user_hash($user);
 		if (!$md4hash)
