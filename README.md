@@ -9,4 +9,4 @@ XML Interface Dialect Layering
 ======================================
 
 We haven't settled on a name just yet.
-And yes, we know that the last one there is XIDL instead of IDLX.
+And yes, we know that the last one there is XIDL instead of IDLX. :)
