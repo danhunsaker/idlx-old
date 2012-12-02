@@ -1,5 +1,5 @@
-idlx
-====
+idlx (or xidl?)
+===============
 
 Interface Description Language (XML)
 Interface Dialects Library (XML)
