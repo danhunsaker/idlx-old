@@ -1,7 +1,8 @@
-Options FollowSymLinks
+Options FollowSymLinks -MultiViews
 
 RewriteEngine on
-RewriteCond  %{HTTPS} ^off$
+RewriteCond  %{HTTPS} ^off$ [OR]
+RewriteCond  %{HTTP:X-Forwarded-Proto} =http
 RewriteCond  %{HTTP_HOST}%{REQUEST_URI} (.*)
 RewriteRule  (.*) https://%1 [L,R]
 

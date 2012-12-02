@@ -1,0 +1,10 @@
+web1:
+	name: relman
+	php_extensions:
+		- mysql
+		- gd
+		- tidy
+
+db1:
+	name: infman
+	type: mysql
