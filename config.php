@@ -12,10 +12,10 @@
 	$server_config = array (
 		'db' => array (
 			'engine' => 'MySQL',
-			'host' => '127.0.0.1',
-			'user' => 'idlx-default',						//	YOU WANT TO CHANGE THIS!  YOU SHOULD ALSO USE SOMETHING DIFFERENT IN YOUR PROJECT CONFIGS!
-			'pass' => 'idlx-password',						//	YOU WANT TO CHANGE THIS TOO!
-			'name' => 'idlx',								//	
+			'host' => $_SERVER['DB1_HOST'],
+			'user' => $_SERVER['DB1_USER'],					//	YOU WANT TO CHANGE THIS!  YOU SHOULD ALSO USE SOMETHING DIFFERENT IN YOUR PROJECT CONFIGS!
+			'pass' => $_SERVER['DB1_PASS'],					//	YOU WANT TO CHANGE THIS TOO!
+			'name' => $_SERVER['DB1_NAME'],					//	
 			'encryption-password' => 'idlx-encrypt',		//	YOU WANT TO CHANGE THIS TOO!
 			'scripts' => array (							//	Scripts should use a different username and password, so as to limit what the DB will allow them to do.
 				'user' => 'idlx-scripts',					//	So, we set a separate username here...
