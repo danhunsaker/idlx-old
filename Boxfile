@@ -4,6 +4,7 @@ web1:
       - mysql
       - gd
       - tidy
+      - mbstring
 
 db1:
    name: infman
