@@ -15,6 +15,10 @@
 
 			try {
 				$this->con = new PDO('mysql:dbname='.$database.';host='.$server, $user, $pass);
+				if (!is_a($this->con, 'PDO')) {
+					error_log("Connection not established.  [" . var_export($this->con, true) . "]");
+					return false;
+				}
 				$this->results = new PDOStatement();
 			}
 			catch (PDOException $e) {

@@ -1,7 +1,8 @@
 web1:
    name: relman
    php_extensions:
-      - mysql
+      - pdo
+      - pdo_mysql
       - gd
       - tidy
       - mbstring
