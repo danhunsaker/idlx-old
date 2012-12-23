@@ -78,7 +78,7 @@
 				1 => 'Pass',								//	and auth-engine-2 is the second fallback, etc.
 			),												
 		),
-		'temp_dir' => is_writable(sys_get_temp_dir()) ? sys_get_temp_dir() : 'temp/scripts';
+		'temp_dir' => (is_writable(sys_get_temp_dir()) ? sys_get_temp_dir() : 'temp/scripts'),
 	);
 
 	$server_config = collapse_multi_array($server_config);
