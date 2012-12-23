@@ -59,11 +59,12 @@
 		}
 		
 		public function run_script ($script) {
+			global $config;
 			//	Don't forget to add code to initialize the various variables and such that IDLX-S scripts need access to!!!
 //			error_log("IDLXS_PHP::run_script || Running {$script}");
 			$api = $this->getAPICode();
 			$script = "<?php\n{$api}{$script}\n?>";
-			$sfile = tempnam(sys_get_temp_dir(), 'idlxs-');
+			$sfile = tempnam($config['temp_dir'], 'idlxs-');
 			file_put_contents($sfile, $script);
 			$output = exec("php -f \"{$sfile}\"", $out, $result);
 			unlink($sfile);

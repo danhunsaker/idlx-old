@@ -6,6 +6,8 @@ web1:
       - gd
       - tidy
       - mbstring
+   shared_writable_dirs:
+      - temp/scripts
 
 db1:
    name: infman

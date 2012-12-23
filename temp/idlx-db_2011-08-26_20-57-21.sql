@@ -30,13 +30,13 @@ SET time_zone = "+00:00";
 --
 
 DROP TABLE IF EXISTS `accesscontrollist`;
-CREATE TABLE "accesscontrollist" (
-  "ID" bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Internal ID',
-  "UserID" varchar(35) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'ID of User to which this ACL applies (do not use GroupID!)',
-  "GroupID" varchar(35) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'ID of Group to which this ACL applies (do not use UserID!)',
-  "Permission" bigint(20) unsigned NOT NULL COMMENT 'Permission ID for object to which this ACL applies.',
-  "PermissionLevel" set('read','write','backup','add','remove','import','recode','invert') COLLATE utf8_unicode_ci NOT NULL DEFAULT '' COMMENT 'The level of permission allowed.',
-  PRIMARY KEY ("ID")
+CREATE TABLE accesscontrollist (
+  ID bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Internal ID',
+  UserID varchar(35) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'ID of User to which this ACL applies (do not use GroupID!)',
+  GroupID varchar(35) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'ID of Group to which this ACL applies (do not use UserID!)',
+  Permission bigint(20) unsigned NOT NULL COMMENT 'Permission ID for object to which this ACL applies.',
+  PermissionLevel set('read','write','backup','add','remove','import','recode','invert') COLLATE utf8_unicode_ci NOT NULL DEFAULT '' COMMENT 'The level of permission allowed.',
+  PRIMARY KEY (`ID`)
 );
 
 --
@@ -58,11 +58,11 @@ INSERT INTO `accesscontrollist` (`ID`, `UserID`, `GroupID`, `Permission`, `Permi
 --
 
 DROP TABLE IF EXISTS `groupmembership`;
-CREATE TABLE "groupmembership" (
-  "ID" bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Internal ID (just in case)',
-  "UserID" varchar(35) COLLATE utf8_unicode_ci NOT NULL COMMENT 'User ID of the Group member.',
-  "GroupID" varchar(35) COLLATE utf8_unicode_ci NOT NULL COMMENT 'Group ID of the Group.',
-  PRIMARY KEY ("ID")
+CREATE TABLE groupmembership (
+  ID bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Internal ID (just in case)',
+  UserID varchar(35) COLLATE utf8_unicode_ci NOT NULL COMMENT 'User ID of the Group member.',
+  GroupID varchar(35) COLLATE utf8_unicode_ci NOT NULL COMMENT 'Group ID of the Group.',
+  PRIMARY KEY (`ID`)
 );
 
 --
@@ -83,12 +83,12 @@ INSERT INTO `groupmembership` (`ID`, `UserID`, `GroupID`) VALUES
 --
 
 DROP TABLE IF EXISTS `groups`;
-CREATE TABLE "groups" (
-  "GroupID" varchar(35) COLLATE utf8_unicode_ci NOT NULL COMMENT 'Internal ID',
-  "GroupName" varchar(255) COLLATE utf8_unicode_ci NOT NULL COMMENT 'Group Name (UI)',
-  "Administrator" varchar(35) COLLATE utf8_unicode_ci NOT NULL COMMENT 'The UserID of the Group''s Administrator.',
-  "Notes" longtext COLLATE utf8_unicode_ci COMMENT 'Notes.',
-  PRIMARY KEY ("GroupID")
+CREATE TABLE groups (
+  GroupID varchar(35) COLLATE utf8_unicode_ci NOT NULL COMMENT 'Internal ID',
+  GroupName varchar(255) COLLATE utf8_unicode_ci NOT NULL COMMENT 'Group Name (UI)',
+  Administrator varchar(35) COLLATE utf8_unicode_ci NOT NULL COMMENT 'The UserID of the Group''s Administrator.',
+  Notes longtext COLLATE utf8_unicode_ci COMMENT 'Notes.',
+  PRIMARY KEY (`GroupID`)
 );
 
 --
@@ -109,14 +109,14 @@ INSERT INTO `groups` (`GroupID`, `GroupName`, `Administrator`, `Notes`) VALUES
 --
 
 DROP TABLE IF EXISTS `interfaces`;
-CREATE TABLE "interfaces" (
-  "ID" bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Internal ID',
-  "InterfaceName" varchar(255) COLLATE utf8_unicode_ci NOT NULL COMMENT 'Descriptive name',
-  "CodeName" varchar(30) COLLATE utf8_unicode_ci NOT NULL COMMENT 'Name in code',
-  "CodeBlock" longtext COLLATE utf8_unicode_ci NOT NULL COMMENT 'The actual IDLX code block.',
-  "Ajax" longtext COLLATE utf8_unicode_ci COMMENT 'PHP code for handling AJAX requests.',
-  "Notes" longtext COLLATE utf8_unicode_ci COMMENT 'Notes about the IDLX.',
-  PRIMARY KEY ("ID")
+CREATE TABLE interfaces (
+  ID bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Internal ID',
+  InterfaceName varchar(255) COLLATE utf8_unicode_ci NOT NULL COMMENT 'Descriptive name',
+  CodeName varchar(30) COLLATE utf8_unicode_ci NOT NULL COMMENT 'Name in code',
+  CodeBlock longtext COLLATE utf8_unicode_ci NOT NULL COMMENT 'The actual IDLX code block.',
+  Ajax longtext COLLATE utf8_unicode_ci COMMENT 'PHP code for handling AJAX requests.',
+  Notes longtext COLLATE utf8_unicode_ci COMMENT 'Notes about the IDLX.',
+  PRIMARY KEY (`ID`)
 );
 
 --
@@ -140,15 +140,15 @@ INSERT INTO `interfaces` (`ID`, `InterfaceName`, `CodeName`, `CodeBlock`, `Ajax`
 --
 
 DROP TABLE IF EXISTS `permissions`;
-CREATE TABLE "permissions" (
-  "ID" bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Internal ID',
-  "PermName" varchar(255) COLLATE utf8_unicode_ci NOT NULL COMMENT 'UI Name',
-  "InterfaceID" bigint(20) unsigned DEFAULT NULL COMMENT 'Interface ID for this Perm (do not use TableName or FieldName!)',
-  "TableName" varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'Table Name for this Perm (do not use InterfaceID!)',
-  "FieldName" varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'Field Name for this Perm (do not use InterfaceID!  TableName is MANDATORY!)',
-  "ParentPerm" bigint(20) unsigned DEFAULT NULL COMMENT 'ID of Perm from which this one should inherit ACLs.',
-  "Details" longtext COLLATE utf8_unicode_ci COMMENT 'Notes',
-  PRIMARY KEY ("ID")
+CREATE TABLE permissions (
+  ID bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Internal ID',
+  PermName varchar(255) COLLATE utf8_unicode_ci NOT NULL COMMENT 'UI Name',
+  InterfaceID bigint(20) unsigned DEFAULT NULL COMMENT 'Interface ID for this Perm (do not use TableName or FieldName!)',
+  TableName varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'Table Name for this Perm (do not use InterfaceID!)',
+  FieldName varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'Field Name for this Perm (do not use InterfaceID!  TableName is MANDATORY!)',
+  ParentPerm bigint(20) unsigned DEFAULT NULL COMMENT 'ID of Perm from which this one should inherit ACLs.',
+  Details longtext COLLATE utf8_unicode_ci COMMENT 'Notes',
+  PRIMARY KEY (`ID`)
 );
 
 --
@@ -171,12 +171,12 @@ INSERT INTO `permissions` (`ID`, `PermName`, `InterfaceID`, `TableName`, `FieldN
 --
 
 DROP TABLE IF EXISTS `userinfo`;
-CREATE TABLE "userinfo" (
-  "UserID" varchar(35) COLLATE utf8_unicode_ci NOT NULL,
-  "Login" varchar(50) COLLATE utf8_unicode_ci NOT NULL,
-  "Password" varbinary(255) NOT NULL,
-  "CertDN" varchar(255) COLLATE utf8_unicode_ci NOT NULL COMMENT 'The full Subject DN of a valid cert.',
-  PRIMARY KEY ("UserID")
+CREATE TABLE userinfo (
+  UserID varchar(35) COLLATE utf8_unicode_ci NOT NULL,
+  Login varchar(50) COLLATE utf8_unicode_ci NOT NULL,
+  Password varbinary(255) NOT NULL,
+  CertDN varchar(255) COLLATE utf8_unicode_ci NOT NULL COMMENT 'The full Subject DN of a valid cert.',
+  PRIMARY KEY (`UserID`)
 );
 
 --
