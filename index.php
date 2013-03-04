@@ -41,4 +41,3 @@
 	session_commit();
 	chdir($proj_dir);
 	ob_end_flush();
-?>
