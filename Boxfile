@@ -6,6 +6,7 @@ web1:
       - gd
       - tidy
       - mbstring
+      - mcrypt
    shared_writable_dirs:
       - temp/scripts
 
